@@ -118,6 +118,7 @@ export function listRules(params: RuleListParams = {}, signal?: AbortSignal): Pr
   return apiRequest<RuleListResponse>("/api/rules", {
     method: "GET",
     query: {
+      os: params.os_target,
       level: params.level,
       category: params.category || undefined,
       auto_remediate: params.auto_remediate,

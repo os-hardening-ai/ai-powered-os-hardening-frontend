@@ -1,26 +1,18 @@
 import { Search, X } from "lucide-react";
 import type { RuleListParams } from "@/types/api";
 
-const CATEGORIES = [
-  "Initial Setup and Filesystem Configuration",
-  "Software and Service Configuration",
-  "Network Configuration",
-  "Logging and Auditing",
-  "Access Authentication and Authorization",
-  "System Maintenance",
-  "Security Patching and Updates",
-];
-
 export function RuleFilters({
   search,
   onSearch,
   filters,
   onFilters,
+  categories,
 }: {
   search: string;
   onSearch: (v: string) => void;
   filters: RuleListParams;
   onFilters: (f: RuleListParams) => void;
+  categories: string[];
 }) {
   const setLevel = (lvl?: 1 | 2) => onFilters({ ...filters, level: filters.level === lvl ? undefined : lvl });
   const setAuto = (v?: boolean) =>
@@ -75,7 +67,7 @@ export function RuleFilters({
         onChange={(e) => onFilters({ ...filters, category: e.target.value || undefined })}
       >
         <option value="">Tüm kategoriler</option>
-        {CATEGORIES.map((c) => (
+        {categories.map((c) => (
           <option key={c} value={c}>
             {c}
           </option>

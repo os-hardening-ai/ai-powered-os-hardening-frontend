@@ -10,14 +10,17 @@ import type {
   SecurityLevel,
   StreamMetadata,
   UserRole,
+  ZtMaturity,
 } from "@/types/api";
 
 export interface ChatSettings {
   os: OsTarget | null;
   role: UserRole | null;
   security_level: SecurityLevel;
+  zt_maturity: ZtMaturity;
   use_rag: boolean;
   rag_top_k: number;
+  rag_min_score: number;
   stream: boolean;
 }
 
@@ -43,8 +46,10 @@ export const DEFAULT_SETTINGS: ChatSettings = {
   os: "ubuntu_24_04",
   role: "sysadmin",
   security_level: "balanced",
+  zt_maturity: "medium",
   use_rag: true,
   rag_top_k: 5,
+  rag_min_score: 0,
   stream: true,
 };
 
@@ -82,8 +87,10 @@ export function useChat() {
         os: settings.os,
         role: settings.role,
         security_level: settings.security_level,
+        zt_maturity: settings.zt_maturity,
         use_rag: settings.use_rag,
         rag_top_k: settings.rag_top_k,
+        rag_min_score: settings.rag_min_score > 0 ? settings.rag_min_score : undefined,
         stream: settings.stream,
         session_id: sessionId.current,
         timeout: 90,
@@ -113,7 +120,6 @@ export function useChat() {
             patchMessage(assistantId, { streaming: false, meta: baseMeta });
             setBusy(false);
             abortRef.current = null;
-            // Stream endpoint returns no rag_sources — fetch them separately.
             if (streamMeta.rag_used) {
               ragSearch({ query: question, top_k: req.rag_top_k ?? 5 })
                 .then((r) =>
@@ -133,7 +139,6 @@ export function useChat() {
               streaming: false,
               content: "Stream başarısız oldu — standart isteğe düşülüyor…",
             });
-            // Fall back to the non-streaming endpoint for a complete answer.
             postChat({ ...req, stream: false })
               .then((res) => applyFullResponse(assistantId, res))
               .catch((e) => {

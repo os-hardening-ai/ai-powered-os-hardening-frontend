@@ -1,16 +1,12 @@
-import type { OsTarget, UserRole, SecurityLevel, ArtifactFormat } from "@/types/api";
+import type { OsTarget, UserRole, SecurityLevel, ArtifactFormat, ZtMaturity } from "@/types/api";
 
-// When VITE_API_BASE_URL is empty we use same-origin relative paths, which in
-// dev are routed through the Vite proxy (see vite.config.ts) to the backend.
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 
 export const OS_OPTIONS: { value: OsTarget; label: string; family: "linux" | "windows" }[] = [
-  { value: "ubuntu_24_04", label: "Ubuntu 24.04", family: "linux" },
-  { value: "ubuntu_22_04", label: "Ubuntu 22.04", family: "linux" },
+  { value: "ubuntu_24_04", label: "Ubuntu 24.04 LTS", family: "linux" },
+  { value: "ubuntu_22_04", label: "Ubuntu 22.04 LTS", family: "linux" },
   { value: "windows_11", label: "Windows 11", family: "windows" },
-  { value: "windows_10", label: "Windows 10", family: "windows" },
-  { value: "windows_server_2022", label: "Windows Server 2022", family: "windows" },
-  { value: "windows_server_2019", label: "Windows Server 2019", family: "windows" },
+  { value: "windows_server_2025", label: "Windows Server 2025", family: "windows" },
 ];
 
 export const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
@@ -18,9 +14,16 @@ export const ROLE_OPTIONS: { value: UserRole; label: string }[] = [
   { value: "soc", label: "SOC Analyst" },
   { value: "devops", label: "DevOps" },
   { value: "developer", label: "Developer" },
+  { value: "auditor", label: "Auditor" },
 ];
 
 export const SECURITY_LEVELS: SecurityLevel[] = ["minimal", "balanced", "strict"];
+
+export const ZT_MATURITY_OPTIONS: { value: ZtMaturity; label: string; description: string }[] = [
+  { value: "low", label: "Düşük", description: "Least privilege + temel loglama" },
+  { value: "medium", label: "Orta", description: "+ MFA + ağ segmentasyonu" },
+  { value: "high", label: "Yüksek", description: "+ sürekli doğrulama + mikro-segmentasyon" },
+];
 
 export const ARTIFACT_FORMATS: { value: ArtifactFormat; label: string; family: "linux" | "windows" | "any" }[] = [
   { value: "bash", label: "Bash (.sh)", family: "linux" },

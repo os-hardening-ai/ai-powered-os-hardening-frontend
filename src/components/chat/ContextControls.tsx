@@ -1,7 +1,7 @@
 import { Select, Toggle } from "@/components/ui/ui";
-import { OS_OPTIONS, ROLE_OPTIONS, SECURITY_LEVELS } from "@/config";
+import { OS_OPTIONS, ROLE_OPTIONS, SECURITY_LEVELS, ZT_MATURITY_OPTIONS } from "@/config";
 import type { ChatSettings } from "@/hooks/useChat";
-import type { OsTarget, SecurityLevel, UserRole } from "@/types/api";
+import type { OsTarget, SecurityLevel, UserRole, ZtMaturity } from "@/types/api";
 
 export function ContextControls({
   settings,
@@ -12,6 +12,8 @@ export function ContextControls({
 }) {
   const set = <K extends keyof ChatSettings>(key: K, value: ChatSettings[K]) =>
     onChange({ ...settings, [key]: value });
+
+  const ztDesc = ZT_MATURITY_OPTIONS.find((o) => o.value === settings.zt_maturity)?.description;
 
   return (
     <div className="space-y-4">
@@ -36,6 +38,23 @@ export function ContextControls({
             onChange={(v) => set("security_level", v)}
             options={SECURITY_LEVELS.map((s) => ({ value: s, label: s }))}
           />
+          <label className="flex flex-col gap-1">
+            <span className="label">ZT Olgunluğu</span>
+            <select
+              className="field appearance-none"
+              value={settings.zt_maturity}
+              onChange={(e) => set("zt_maturity", e.target.value as ZtMaturity)}
+            >
+              {ZT_MATURITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value} className="bg-surface">
+                  {o.label} — {o.description}
+                </option>
+              ))}
+            </select>
+            {ztDesc && (
+              <span className="font-mono text-[10px] leading-relaxed text-faint">{ztDesc}</span>
+            )}
+          </label>
         </div>
       </div>
 
@@ -54,6 +73,24 @@ export function ContextControls({
             value={settings.rag_top_k}
             disabled={!settings.use_rag}
             onChange={(e) => set("rag_top_k", Number(e.target.value))}
+            className="accent-accent disabled:opacity-40"
+          />
+        </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="label normal-case tracking-normal text-muted">
+            Min. benzerlik skoru:{" "}
+            <span className={settings.rag_min_score > 0 ? "text-accent" : "text-faint"}>
+              {settings.rag_min_score > 0 ? settings.rag_min_score.toFixed(2) : "kapalı"}
+            </span>
+          </span>
+          <input
+            type="range"
+            min={0}
+            max={0.9}
+            step={0.05}
+            value={settings.rag_min_score}
+            disabled={!settings.use_rag}
+            onChange={(e) => set("rag_min_score", Number(e.target.value))}
             className="accent-accent disabled:opacity-40"
           />
         </label>
