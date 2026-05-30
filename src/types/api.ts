@@ -158,9 +158,64 @@ export interface HealthResponse {
   status: string;
   service?: string;
   rag_available?: boolean;
-  // /health/detailed adds component-level status
   components?: Record<string, string>;
+  dependencies?: Record<string, string>;
   [k: string]: unknown;
+}
+
+// ── /api/agent ───────────────────────────────────────────────
+export interface AgentPlanRequest {
+  goal: string;
+  os_target?: string;
+  security_level?: SecurityLevel;
+}
+
+export interface AgentPlanItem {
+  rule_id: string;
+  title: string;
+  order: number;
+  priority: number;
+  rationale: string;
+  risk: string;
+  zt_principle: string;
+  nist_ref: string;
+}
+
+export interface AgentPlanResponse {
+  goal: string;
+  os_target: string;
+  security_level: string;
+  summary: string;
+  items: AgentPlanItem[];
+  conflicts: RuleConflict[];
+  warnings: string[];
+}
+
+export interface AgentStep {
+  name: string;
+  tool: string;
+  detail: string;
+  ok: boolean;
+}
+
+export interface AgentHardenRequest {
+  goal: string;
+  os_target?: string;
+  security_level?: SecurityLevel;
+  format?: ArtifactFormat;
+}
+
+export interface AgentHardenResponse {
+  success: boolean;
+  goal: string;
+  os_target: string;
+  format: string;
+  summary: string;
+  rule_count: number;
+  artifact_content: string;
+  issues: string[];
+  steps: AgentStep[];
+  plan: AgentPlanResponse;
 }
 
 // ── normalized API error ─────────────────────────────────────

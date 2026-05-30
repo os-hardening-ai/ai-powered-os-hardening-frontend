@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/config";
+import { API_BASE_URL, API_KEY } from "@/config";
 import type { ApiErrorShape } from "@/types/api";
 
 export class ApiError extends Error implements ApiErrorShape {
@@ -94,9 +94,12 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
   if (signal) signal.addEventListener("abort", () => controller.abort(), { once: true });
 
   try {
+    const headers: Record<string, string> = {};
+    if (body) headers["Content-Type"] = "application/json";
+    if (API_KEY) headers["X-API-Key"] = API_KEY;
     const res = await fetch(buildUrl(path, query), {
       method,
-      headers: body ? { "Content-Type": "application/json" } : undefined,
+      headers: Object.keys(headers).length ? headers : undefined,
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });

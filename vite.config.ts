@@ -17,6 +17,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-    server: { port: 5173, proxy },
+    server: { port: 5173, open: true, proxy },
   };
 });

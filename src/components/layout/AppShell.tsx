@@ -1,11 +1,12 @@
 import { type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Boxes, LayoutDashboard, MessagesSquare, Search, ShieldCheck } from "lucide-react";
+import { Boxes, Bot, LayoutDashboard, MessagesSquare, Search, ShieldCheck } from "lucide-react";
 import { useHealth } from "@/hooks/useHealth";
 
 const NAV = [
   { to: "/chat", label: "Asistan", icon: MessagesSquare },
   { to: "/rules", label: "Kurallar", icon: Boxes },
+  { to: "/agent", label: "Agent", icon: Bot },
   { to: "/retrieval", label: "Retrieval", icon: Search },
   { to: "/dashboard", label: "Pano", icon: LayoutDashboard },
 ];
@@ -66,8 +67,18 @@ function Sidebar() {
 
 function TopBar() {
   const { state } = useHealth();
-  const dot = { checking: "bg-warn", online: "bg-accent", offline: "bg-danger" }[state];
-  const label = { checking: "bağlanıyor", online: "API çevrimiçi", offline: "API çevrimdışı" }[state];
+  const dot: Record<string, string> = {
+    checking: "bg-warn",
+    online: "bg-accent",
+    degraded: "bg-warn",
+    offline: "bg-danger",
+  };
+  const label: Record<string, string> = {
+    checking: "bağlanıyor",
+    online: "API çevrimiçi",
+    degraded: "API kısıtlı",
+    offline: "API çevrimdışı",
+  };
 
   return (
     <header className="flex h-12 items-center justify-between border-b border-line bg-surface/40 px-4 backdrop-blur">
@@ -75,8 +86,8 @@ function TopBar() {
         RAG · Rule Engine · Artifact Generator
       </p>
       <div className="flex items-center gap-2 rounded-full border border-line bg-surface-2 px-3 py-1">
-        <span className={`h-2 w-2 rounded-full ${dot} ${state === "online" ? "animate-pulse" : ""}`} />
-        <span className="font-mono text-[11px] uppercase tracking-wider text-muted">{label}</span>
+        <span className={`h-2 w-2 rounded-full ${dot[state]} ${state === "online" ? "animate-pulse" : ""}`} />
+        <span className="font-mono text-[11px] uppercase tracking-wider text-muted">{label[state]}</span>
       </div>
     </header>
   );

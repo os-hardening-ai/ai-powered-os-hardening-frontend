@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ListChecks, Loader2 } from "lucide-react";
 import { useRules } from "@/hooks/useRules";
+import { useCategories } from "@/hooks/useCategories";
 import { ruleMatchesSearch } from "@/lib/format";
 import { OS_OPTIONS } from "@/config";
 import { RuleFilters } from "./RuleFilters";
@@ -46,23 +47,28 @@ export function RulesView() {
     setCollapsedCats(new Set());
   };
 
-  const categories = useMemo(
-    () => [...new Set(rules.map((r) => r.category).filter(Boolean) as string[])].sort(),
-    [rules],
-  );
+  const categories = useCategories(os);
 
   const visible = useMemo(() => rules.filter((r) => ruleMatchesSearch(r, search)), [rules, search]);
   const selectedIds = useMemo(() => [...selected], [selected]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, typeof visible>();
+    // Pre-populate known categories so headers appear even before rules load
+    if (!filters.category && !search) {
+      for (const cat of categories) map.set(cat, []);
+    }
     for (const r of visible) {
       const key = r.category ?? "Diğer";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(r);
     }
-    return [...map.entries()].map(([cat, items]) => ({ cat, items }));
-  }, [visible]);
+    // Remove empty placeholder categories so they don't show a "0 kural" header
+    // when a filter/search is active; keep them during initial load for UX
+    return [...map.entries()]
+      .filter(([, items]) => items.length > 0 || (!filters.category && !search && loading))
+      .map(([cat, items]) => ({ cat, items }));
+  }, [visible, categories, filters.category, search, loading]);
 
   const toggle = (id: string) =>
     setSelected((prev) => {

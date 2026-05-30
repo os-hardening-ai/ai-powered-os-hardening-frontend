@@ -1,16 +1,23 @@
 import { apiRequest, streamUrl } from "@/lib/http";
+import { API_KEY } from "@/config";
 import type {
-  ChatRequest,
-  ChatResponse,
-  RagSearchRequest,
-  RagSearchResponse,
-  RuleListResponse,
-  RuleListParams,
-  ExecutionPlanResponse,
-  RuleConflict,
+  AgentHardenRequest,
+  AgentHardenResponse,
+  AgentPlanRequest,
+  AgentPlanResponse,
   ArtifactRequest,
   ArtifactResponse,
+  ChatRequest,
+  ChatResponse,
+  ExecutionPlanResponse,
   HealthResponse,
+  OsTarget,
+  RagSearchRequest,
+  RagSearchResponse,
+  RagSource,
+  RuleConflict,
+  RuleListParams,
+  RuleListResponse,
   StreamMetadata,
 } from "@/types/api";
 
@@ -22,6 +29,7 @@ export function postChat(req: ChatRequest, signal?: AbortSignal): Promise<ChatRe
 
 export interface StreamHandlers {
   onMetadata?: (m: StreamMetadata) => void;
+  onSources?: (sources: RagSource[]) => void;
   onToken?: (token: string) => void;
   onDone?: (info: Record<string, unknown>) => void;
   onError?: (message: string) => void;
@@ -38,9 +46,14 @@ export function streamChat(req: ChatRequest, handlers: StreamHandlers): () => vo
 
   (async () => {
     try {
+      const streamHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        Accept: "text/event-stream",
+      };
+      if (API_KEY) streamHeaders["X-API-Key"] = API_KEY;
       const res = await fetch(streamUrl("/api/chat/stream"), {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+        headers: streamHeaders,
         body: JSON.stringify({ ...req, stream: true }),
         signal: controller.signal,
       });
@@ -96,6 +109,9 @@ function dispatchSseFrame(frame: string, handlers: StreamHandlers): void {
     case "metadata":
       handlers.onMetadata?.(data as StreamMetadata);
       break;
+    case "sources":
+      handlers.onSources?.((data.rag_sources as RagSource[]) ?? []);
+      break;
     case "message":
       if (typeof data.token === "string") handlers.onToken?.(data.token);
       break;
@@ -114,6 +130,14 @@ export function ragSearch(req: RagSearchRequest, signal?: AbortSignal): Promise<
 }
 
 // ── Rules ────────────────────────────────────────────────────
+export function listCategories(os?: OsTarget, signal?: AbortSignal): Promise<string[]> {
+  return apiRequest<string[]>("/api/rules/categories", {
+    method: "GET",
+    query: { os },
+    signal,
+  });
+}
+
 export function listRules(params: RuleListParams = {}, signal?: AbortSignal): Promise<RuleListResponse> {
   return apiRequest<RuleListResponse>("/api/rules", {
     method: "GET",
@@ -148,6 +172,15 @@ export function detectConflicts(ruleIds: string[], signal?: AbortSignal): Promis
 // ── Artifacts ────────────────────────────────────────────────
 export function generateArtifact(req: ArtifactRequest, signal?: AbortSignal): Promise<ArtifactResponse> {
   return apiRequest<ArtifactResponse>("/api/artifacts/generate", { method: "POST", body: req, signal });
+}
+
+// ── Agent ────────────────────────────────────────────────────
+export function agentPlan(req: AgentPlanRequest, signal?: AbortSignal): Promise<AgentPlanResponse> {
+  return apiRequest<AgentPlanResponse>("/api/agent/plan", { method: "POST", body: req, signal, timeoutMs: 120_000 });
+}
+
+export function agentHarden(req: AgentHardenRequest, signal?: AbortSignal): Promise<AgentHardenResponse> {
+  return apiRequest<AgentHardenResponse>("/api/agent/harden", { method: "POST", body: req, signal, timeoutMs: 120_000 });
 }
 
 // ── System ───────────────────────────────────────────────────

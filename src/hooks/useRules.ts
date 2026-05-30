@@ -3,7 +3,7 @@ import { listRules } from "@/lib/api";
 import { ApiError } from "@/lib/http";
 import type { CisRule, OsTarget, RuleListParams } from "@/types/api";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 600;
 
 export function useRules(os?: OsTarget) {
   const [rules, setRules] = useState<CisRule[]>([]);

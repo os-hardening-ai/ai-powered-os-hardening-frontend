@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Activity, Cpu, Gauge, Server, Timer } from "lucide-react";
 import { apiRequest } from "@/lib/http";
 import { useHealth } from "@/hooks/useHealth";
-import { Card } from "@/components/ui/ui";
+import { Badge, Card } from "@/components/ui/ui";
 
 interface Metrics {
   requests: { total: number; successful: number; failed: number; error_rate: number };
@@ -13,7 +13,7 @@ interface Metrics {
 }
 
 export function DashboardView() {
-  const { state, ragAvailable } = useHealth(15_000);
+  const { state, ragAvailable, dependencies } = useHealth(15_000);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
@@ -31,8 +31,8 @@ export function DashboardView() {
     };
   }, []);
 
-  const stateLabel = { checking: "kontrol ediliyor", online: "çevrimiçi", offline: "çevrimdışı" }[state];
-  const stateColor = { checking: "text-warn", online: "text-accent", offline: "text-danger" }[state];
+  const stateLabel: Record<string, string> = { checking: "kontrol ediliyor", online: "çevrimiçi", degraded: "kısıtlı", offline: "çevrimdışı" };
+  const stateColor: Record<string, string> = { checking: "text-warn", online: "text-accent", degraded: "text-warn", offline: "text-danger" };
 
   return (
     <div className="h-full space-y-4 overflow-y-auto">
@@ -40,8 +40,8 @@ export function DashboardView() {
         <Stat
           icon={<Server size={16} />}
           label="API durumu"
-          value={stateLabel}
-          valueClass={stateColor}
+          value={stateLabel[state]}
+          valueClass={stateColor[state]}
           sub={state === "checking" ? "RAG kontrol ediliyor" : ragAvailable ? "RAG aktif" : "RAG çevrimdışı"}
         />
         <Stat
@@ -112,6 +112,22 @@ export function DashboardView() {
           )}
         </Card>
       </div>
+
+      {Object.keys(dependencies).length > 0 && (
+        <Card className="p-4">
+          <h3 className="label mb-3">Bağımlılık durumu</h3>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(dependencies).map(([name, status]) => (
+              <Badge
+                key={name}
+                tone={status === "ok" ? "accent" : status === "disabled" ? "muted" : "danger"}
+              >
+                {name}: {status}
+              </Badge>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
