@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Activity, Cpu, Gauge, Server, Timer } from "lucide-react";
 import { apiRequest } from "@/lib/http";
 import { useHealth } from "@/hooks/useHealth";
@@ -35,14 +35,14 @@ export function DashboardView() {
   const stateColor = { checking: "text-warn", online: "text-accent", offline: "text-danger" }[state];
 
   return (
-    <div className="space-y-4 overflow-y-auto">
+    <div className="h-full space-y-4 overflow-y-auto">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           icon={<Server size={16} />}
           label="API durumu"
           value={stateLabel}
           valueClass={stateColor}
-          sub={ragAvailable ? "RAG aktif" : "RAG durumu bilinmiyor"}
+          sub={state === "checking" ? "RAG kontrol ediliyor" : ragAvailable ? "RAG aktif" : "RAG çevrimdışı"}
         />
         <Stat
           icon={<Activity size={16} />}
@@ -123,7 +123,7 @@ function Stat({
   sub,
   valueClass = "text-ink",
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
   sub?: string;

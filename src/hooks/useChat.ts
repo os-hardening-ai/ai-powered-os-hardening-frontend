@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { postChat, streamChat } from "@/lib/api";
+import { postChat, ragSearch, streamChat } from "@/lib/api";
 import { ApiError } from "@/lib/http";
 import { newSessionId } from "@/lib/format";
 import type {
@@ -103,18 +103,30 @@ export function useChat() {
               prev.map((msg) => (msg.id === assistantId ? { ...msg, content: msg.content + tok } : msg)),
             ),
           onDone: (info) => {
-            patchMessage(assistantId, {
-              streaming: false,
-              meta: {
-                intent: streamMeta.intent,
-                safety_category: streamMeta.safety,
-                layer_path: streamMeta.layer_path,
-                rag_used: streamMeta.rag_used,
-                total_time_s: typeof info.total_time_s === "number" ? info.total_time_s : undefined,
-              },
-            });
+            const baseMeta = {
+              intent: streamMeta.intent,
+              safety_category: streamMeta.safety,
+              layer_path: streamMeta.layer_path,
+              rag_used: streamMeta.rag_used,
+              total_time_s: typeof info.total_time_s === "number" ? info.total_time_s : undefined,
+            };
+            patchMessage(assistantId, { streaming: false, meta: baseMeta });
             setBusy(false);
             abortRef.current = null;
+            // Stream endpoint returns no rag_sources — fetch them separately.
+            if (streamMeta.rag_used) {
+              ragSearch({ query: question, top_k: req.rag_top_k ?? 5 })
+                .then((r) =>
+                  setMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === assistantId
+                        ? { ...m, meta: { ...(m.meta ?? {}), rag_sources: r.results } }
+                        : m,
+                    ),
+                  ),
+                )
+                .catch(() => {});
+            }
           },
           onError: (msg) => {
             patchMessage(assistantId, {

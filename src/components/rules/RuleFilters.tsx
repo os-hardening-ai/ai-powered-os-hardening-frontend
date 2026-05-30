@@ -8,6 +8,7 @@ const CATEGORIES = [
   "Logging and Auditing",
   "Access Authentication and Authorization",
   "System Maintenance",
+  "Security Patching and Updates",
 ];
 
 export function RuleFilters({

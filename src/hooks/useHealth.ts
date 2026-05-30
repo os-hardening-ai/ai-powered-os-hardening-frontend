@@ -16,7 +16,7 @@ export function useHealth(intervalMs = 30_000): { state: HealthState; ragAvailab
         const h = await getHealth(controller.signal);
         if (!active) return;
         setState(h.status === "ok" || h.status === "healthy" ? "online" : "offline");
-        setRagAvailable(Boolean(h.rag_available));
+        setRagAvailable(h.components?.vector_store === "ok");
       } catch {
         if (active) setState("offline");
       }

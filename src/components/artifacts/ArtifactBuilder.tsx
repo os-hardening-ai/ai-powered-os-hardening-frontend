@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertTriangle, Boxes, Check, Copy, Download, GitMerge, Loader2, Play, ShieldAlert } from "lucide-react";
 import { generateArtifact, getExecutionPlan } from "@/lib/api";
 import { ApiError } from "@/lib/http";
@@ -25,6 +25,10 @@ export function ArtifactBuilder({
   const fam = osFamily(os);
   const formats = ARTIFACT_FORMATS.filter((f) => f.family === "any" || f.family === fam);
   const [format, setFormat] = useState<ArtifactFormat>(fam === "windows" ? "powershell" : "bash");
+
+  useEffect(() => {
+    setFormat(fam === "windows" ? "powershell" : "bash");
+  }, [fam]);
   const [level, setLevel] = useState<SecurityLevel>("balanced");
   const [plan, setPlan] = useState<ExecutionPlanResponse | null>(null);
   const [artifact, setArtifact] = useState<ArtifactResponse | null>(null);
