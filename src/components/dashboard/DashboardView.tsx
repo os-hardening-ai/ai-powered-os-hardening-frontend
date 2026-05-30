@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Activity, Cpu, Gauge, Server, Timer } from "lucide-react";
 import { apiRequest } from "@/lib/http";
 import { useHealth } from "@/hooks/useHealth";
@@ -123,7 +123,7 @@ function Stat({
   sub,
   valueClass = "text-ink",
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
   sub?: string;

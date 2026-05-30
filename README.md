@@ -58,6 +58,55 @@ npm run dev
 
 ---
 
+## Docker
+
+Backend reposuyla aynı konvansiyonlar kullanılır (`restart: unless-stopped`,
+healthcheck, env ile yapılandırma, `host.docker.internal:host-gateway`).
+
+### Production (nginx)
+
+Çok aşamalı build: statik bundle üretilir ve **nginx** ile servis edilir; nginx
+aynı zamanda `/api`, `/rag`, `/health`, `/metrics` isteklerini backend'e
+**reverse-proxy** eder (aynı origin → CORS yok, SSE streaming buffer'sız akar).
+
+```bash
+docker compose up -d --build
+# → http://localhost:8080   (backend: http://host.docker.internal:8000 varsayılan)
+```
+
+Backend başka bir adreste ise:
+
+```bash
+BACKEND_URL=http://api:8000 FRONTEND_PORT=8080 docker compose up -d --build
+```
+
+Backend'i de aynı compose ağında çalıştırıyorsan, frontend servisini backend
+compose dosyasına ekleyip `BACKEND_URL=http://api:8000` ver (servis adı `api`).
+
+### Development (Vite + HMR)
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+# → http://localhost:5173   (kaynak bind-mount, hot reload)
+```
+
+### Docker dosyaları
+
+| Dosya                     | Rol                                              |
+| ------------------------- | ------------------------------------------------ |
+| `Dockerfile`              | Prod: node build → nginx (multi-stage)           |
+| `Dockerfile.dev`          | Dev: Vite dev server                             |
+| `nginx/default.conf.template` | SPA fallback + backend proxy + SSE + güvenlik başlıkları |
+| `docker-compose.yml`      | Prod servisi (8080→80, healthcheck)              |
+| `docker-compose.dev.yml`  | Dev servisi (5173, HMR)                          |
+| `.env.docker.example`     | `FRONTEND_PORT`, `BACKEND_URL` (opsiyonel)       |
+
+> `BACKEND_URL` build sırasında değil **çalışma anında** enjekte edilir (nginx
+> `envsubst`), yani aynı imaj farklı backend adresleriyle yeniden derlenmeden
+> kullanılabilir.
+
+---
+
 ## Backend Bağlantısı
 
 Geliştirmede CORS yaşamamak için Vite dev sunucusu istekleri backend'e **proxy**'ler
