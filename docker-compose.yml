@@ -22,7 +22,7 @@ services:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:80/healthz"]
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:80/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3

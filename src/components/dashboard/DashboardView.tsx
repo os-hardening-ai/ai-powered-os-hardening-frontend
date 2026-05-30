@@ -35,7 +35,7 @@ export function DashboardView() {
   const stateColor = { checking: "text-warn", online: "text-accent", offline: "text-danger" }[state];
 
   return (
-    <div className="space-y-4 overflow-y-auto">
+    <div className="h-full space-y-4 overflow-y-auto">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           icon={<Server size={16} />}
