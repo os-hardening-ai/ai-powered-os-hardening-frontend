@@ -7,12 +7,10 @@
 export type OsTarget =
   | "ubuntu_22_04"
   | "ubuntu_24_04"
-  | "windows_10"
   | "windows_11"
-  | "windows_server_2019"
-  | "windows_server_2022";
+  | "windows_server_2025";
 
-export type UserRole = "sysadmin" | "soc" | "developer" | "devops";
+export type UserRole = "sysadmin" | "soc" | "developer" | "devops" | "auditor";
 export type SecurityLevel = "minimal" | "balanced" | "strict";
 export type ZtMaturity = "low" | "medium" | "high";
 export type ArtifactFormat = "bash" | "powershell" | "ansible" | "reg" | "gpo";
@@ -25,7 +23,7 @@ export interface ChatRequest {
   security_level?: SecurityLevel;
   zt_maturity?: ZtMaturity;
   use_rag?: boolean;
-  rag_top_k?: number; // 1..20
+  rag_top_k?: number;   // 1..20
   rag_min_score?: number; // 0..1
   stream?: boolean;
   timeout?: number; // 1..300
@@ -38,6 +36,7 @@ export interface RagSource {
   source: string;
   section: string;
   text?: string | null;
+  os_version?: string | null;
 }
 
 export interface ChatStats {
@@ -114,6 +113,7 @@ export interface RuleListResponse {
 }
 
 export interface RuleListParams {
+  os_target?: OsTarget;
   level?: 1 | 2;
   category?: string;
   auto_remediate?: boolean;

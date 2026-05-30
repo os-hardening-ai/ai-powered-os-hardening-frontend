@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { listRules } from "@/lib/api";
 import { ApiError } from "@/lib/http";
-import type { CisRule, RuleListParams } from "@/types/api";
+import type { CisRule, OsTarget, RuleListParams } from "@/types/api";
 
 const PAGE_SIZE = 50;
 
-export function useRules() {
+export function useRules(os?: OsTarget) {
   const [rules, setRules] = useState<CisRule[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
@@ -18,7 +18,7 @@ export function useRules() {
       setLoading(true);
       setError(null);
       try {
-        const res = await listRules({ ...nextFilters, limit: PAGE_SIZE, offset: nextOffset });
+        const res = await listRules({ ...nextFilters, os_target: os, limit: PAGE_SIZE, offset: nextOffset });
         setTotal(res.total);
         setOffset(res.offset);
         setRules((prev) => (append ? [...prev, ...res.rules] : res.rules));
@@ -29,7 +29,7 @@ export function useRules() {
         setLoading(false);
       }
     },
-    [],
+    [os],
   );
 
   useEffect(() => {

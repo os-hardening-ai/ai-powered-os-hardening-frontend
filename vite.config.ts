@@ -1,12 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "node:url";
 
-declare const process: { env: Record<string, string | undefined> };
-
-// Vite config. The dev server proxies /api, /rag, /health, /metrics to the
-// FastAPI backend so the browser never hits CORS during development.
 export default defineConfig(({ mode }) => {
-  const backend = process.env.VITE_API_PROXY_TARGET || "http://localhost:8000";
+  const backend = "http://localhost:8000";
   const proxy =
     mode === "development"
       ? {
@@ -19,7 +16,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    resolve: { alias: { "@": new URL("./src", import.meta.url).pathname } },
+    resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
     server: { port: 5173, proxy },
   };
 });

@@ -1,12 +1,12 @@
 import { type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Boxes, Database, LayoutDashboard, MessagesSquare, ShieldCheck } from "lucide-react";
+import { Boxes, LayoutDashboard, MessagesSquare, Search, ShieldCheck } from "lucide-react";
 import { useHealth } from "@/hooks/useHealth";
 
 const NAV = [
   { to: "/chat", label: "Asistan", icon: MessagesSquare },
   { to: "/rules", label: "Kurallar", icon: Boxes },
-  { to: "/rag-test", label: "RAG Test", icon: Database },
+  { to: "/retrieval", label: "Retrieval", icon: Search },
   { to: "/dashboard", label: "Pano", icon: LayoutDashboard },
 ];
 
