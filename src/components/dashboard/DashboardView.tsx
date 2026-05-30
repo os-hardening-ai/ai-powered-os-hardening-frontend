@@ -42,7 +42,7 @@ export function DashboardView() {
           label="API durumu"
           value={stateLabel}
           valueClass={stateColor}
-          sub={ragAvailable ? "RAG aktif" : "RAG durumu bilinmiyor"}
+          sub={state === "checking" ? "RAG kontrol ediliyor" : ragAvailable ? "RAG aktif" : "RAG çevrimdışı"}
         />
         <Stat
           icon={<Activity size={16} />}

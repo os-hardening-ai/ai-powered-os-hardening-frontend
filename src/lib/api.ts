@@ -151,5 +151,5 @@ export function generateArtifact(req: ArtifactRequest, signal?: AbortSignal): Pr
 
 // ── System ───────────────────────────────────────────────────
 export function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
-  return apiRequest<HealthResponse>("/health", { method: "GET", signal, timeoutMs: 8_000 });
+  return apiRequest<HealthResponse>("/health/detailed", { method: "GET", signal, timeoutMs: 10_000 });
 }

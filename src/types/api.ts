@@ -158,6 +158,8 @@ export interface HealthResponse {
   status: string;
   service?: string;
   rag_available?: boolean;
+  // /health/detailed adds component-level status
+  components?: Record<string, string>;
   [k: string]: unknown;
 }
 
