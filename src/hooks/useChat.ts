@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { postChat, ragSearch, streamChat } from "@/lib/api";
+import { postChat, streamChat } from "@/lib/api";
 import { ApiError } from "@/lib/http";
 import { newSessionId } from "@/lib/format";
 import type {
@@ -48,8 +48,8 @@ export const DEFAULT_SETTINGS: ChatSettings = {
   security_level: "balanced",
   zt_maturity: "medium",
   use_rag: true,
-  rag_top_k: 5,
-  rag_min_score: 0,
+  rag_top_k: 3,
+  rag_min_score: 0.5,
   stream: true,
 };
 
@@ -98,6 +98,7 @@ export function useChat() {
 
       if (settings.stream) {
         let streamMeta: StreamMetadata = {};
+        let streamSources: RagSource[] = [];
         const stop = streamChat(req, {
           onMetadata: (m) => {
             streamMeta = m;
@@ -105,34 +106,29 @@ export function useChat() {
               meta: { intent: m.intent, safety_category: m.safety, layer_path: m.layer_path, rag_used: m.rag_used },
             });
           },
+          onSources: (sources) => {
+            streamSources = sources;
+          },
           onToken: (tok) =>
             setMessages((prev) =>
               prev.map((msg) => (msg.id === assistantId ? { ...msg, content: msg.content + tok } : msg)),
             ),
           onDone: (info) => {
-            const baseMeta = {
-              intent: streamMeta.intent,
-              safety_category: streamMeta.safety,
-              layer_path: streamMeta.layer_path,
-              rag_used: streamMeta.rag_used,
-              total_time_s: typeof info.total_time_s === "number" ? info.total_time_s : undefined,
-            };
-            patchMessage(assistantId, { streaming: false, meta: baseMeta });
+            patchMessage(assistantId, {
+              streaming: false,
+              meta: {
+                intent: streamMeta.intent,
+                safety_category: streamMeta.safety,
+                layer_path: streamMeta.layer_path,
+                rag_used: streamMeta.rag_used,
+                rag_sources: streamSources.length > 0 ? streamSources : undefined,
+                total_time_s: typeof info.total_time_s === "number" ? info.total_time_s : undefined,
+                estimated_cost: typeof info.estimated_cost === "number" ? info.estimated_cost : undefined,
+                verification_confidence: typeof info.verification_confidence === "number" ? info.verification_confidence : undefined,
+              },
+            });
             setBusy(false);
             abortRef.current = null;
-            if (streamMeta.rag_used) {
-              ragSearch({ query: question, top_k: req.rag_top_k ?? 5 })
-                .then((r) =>
-                  setMessages((prev) =>
-                    prev.map((m) =>
-                      m.id === assistantId
-                        ? { ...m, meta: { ...(m.meta ?? {}), rag_sources: r.results } }
-                        : m,
-                    ),
-                  ),
-                )
-                .catch(() => {});
-            }
           },
           onError: (msg) => {
             patchMessage(assistantId, {

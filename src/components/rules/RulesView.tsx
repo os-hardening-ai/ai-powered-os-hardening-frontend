@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, ListChecks, Loader2 } from "lucide-react";
 import { useRules } from "@/hooks/useRules";
+import { useCategories } from "@/hooks/useCategories";
 import { ruleMatchesSearch } from "@/lib/format";
 import { OS_OPTIONS } from "@/config";
 import { RuleFilters } from "./RuleFilters";
@@ -46,10 +47,7 @@ export function RulesView() {
     setCollapsedCats(new Set());
   };
 
-  const categories = useMemo(
-    () => [...new Set(rules.map((r) => r.category).filter(Boolean) as string[])].sort(),
-    [rules],
-  );
+  const categories = useCategories(os);
 
   const visible = useMemo(() => rules.filter((r) => ruleMatchesSearch(r, search)), [rules, search]);
   const selectedIds = useMemo(() => [...selected], [selected]);
