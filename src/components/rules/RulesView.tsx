@@ -54,13 +54,21 @@ export function RulesView() {
 
   const grouped = useMemo(() => {
     const map = new Map<string, typeof visible>();
+    // Pre-populate known categories so headers appear even before rules load
+    if (!filters.category && !search) {
+      for (const cat of categories) map.set(cat, []);
+    }
     for (const r of visible) {
       const key = r.category ?? "Diğer";
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(r);
     }
-    return [...map.entries()].map(([cat, items]) => ({ cat, items }));
-  }, [visible]);
+    // Remove empty placeholder categories so they don't show a "0 kural" header
+    // when a filter/search is active; keep them during initial load for UX
+    return [...map.entries()]
+      .filter(([, items]) => items.length > 0 || (!filters.category && !search && loading))
+      .map(([cat, items]) => ({ cat, items }));
+  }, [visible, categories, filters.category, search, loading]);
 
   const toggle = (id: string) =>
     setSelected((prev) => {
