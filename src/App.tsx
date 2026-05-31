@@ -2,6 +2,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { LoginView } from "@/components/auth/LoginView";
+import { RegisterView } from "@/components/auth/RegisterView";
+import { ForgotPasswordView } from "@/components/auth/ForgotPasswordView";
+import { WelcomeView } from "@/components/welcome/WelcomeView";
 import { AppShell } from "@/components/layout/AppShell";
 import { ChatView } from "@/components/chat/ChatView";
 import { RulesView } from "@/components/rules/RulesView";
@@ -13,8 +16,11 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public */}
+        {/* Public — JWT gerektirmez */}
+        <Route path="/welcome" element={<WelcomeView />} />
         <Route path="/login" element={<LoginView />} />
+        <Route path="/register" element={<RegisterView />} />
+        <Route path="/forgot-password" element={<ForgotPasswordView />} />
 
         {/* Protected — JWT gerektirir; AppShell + uygulama route'ları */}
         <Route

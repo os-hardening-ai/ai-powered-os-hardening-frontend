@@ -37,6 +37,27 @@ export interface AuthUser {
   role: Role;
 }
 
+// ── Auth-UX (register / parola sıfırlama) — mirrors api/auth_models.py ──
+export interface RegisterRequest {
+  username: string; // 3..64
+  password: string; // 6..256
+}
+
+export interface ForgotPasswordRequest {
+  username: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  // DEV-mode'da reset token doğrudan döner (e-posta altyapısı yok); prod'da null.
+  reset_token?: string | null;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string; // 6..256
+}
+
 // ── /api/chat ────────────────────────────────────────────────
 export interface ChatRequest {
   question: string;

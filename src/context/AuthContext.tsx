@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { login as apiLogin, logout as apiLogout, getMe } from "@/lib/api";
+import { login as apiLogin, logout as apiLogout, register as apiRegister, getMe } from "@/lib/api";
 import { getToken, setToken, setUnauthorizedHandler } from "@/lib/auth-token";
 import type { AuthUser } from "@/types/api";
 
@@ -17,6 +17,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   status: AuthStatus;
   login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -66,6 +67,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStatus("authenticated");
   }, []);
 
+  // Kayıt → backend otomatik giriş yapar (token döner) → oturumu aç.
+  const register = useCallback(async (username: string, password: string) => {
+    const res = await apiRegister({ username, password });
+    setToken(res.access_token);
+    setUser({ username, role: res.role });
+    setStatus("authenticated");
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await apiLogout(); // jti blacklist (best-effort)
@@ -78,8 +87,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, status, login, logout }),
-    [user, status, login, logout],
+    () => ({ user, status, login, register, logout }),
+    [user, status, login, register, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

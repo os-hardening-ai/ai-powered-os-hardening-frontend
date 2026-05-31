@@ -1,0 +1,25 @@
+# Production override — birleşik VPS deploy (paylaşılan hardening_net + öne Caddy).
+#
+# Kullanım (frontend repo kökünde):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Gerektirir: Docker Compose >= 2.24 ( ports: !reset için ).
+# Önce çalıştır:  docker network create hardening_net
+#
+# BACKEND_URL artık host-gateway değil, paylaşılan ağdaki backend servis adı (api:8000).
+# Caddy bu container'a 'frontend:80' olarak iç ağdan ulaşır → host portu gerekmez.
+
+services:
+  frontend:
+    ports: !reset
+      - "127.0.0.1:8080:80"   # sadece localhost (debug); public erişim Caddy üzerinden
+    environment:
+      - BACKEND_URL=http://api:8000
+    extra_hosts: !reset []     # host-gateway gerekmez (api paylaşılan ağda)
+    networks:
+      - default
+      - hardening_net
+
+networks:
+  hardening_net:
+    external: true
