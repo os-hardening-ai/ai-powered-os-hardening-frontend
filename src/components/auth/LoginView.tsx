@@ -81,8 +81,6 @@ export function LoginView() {
 
       <p className="mt-4 font-mono text-[10px] leading-relaxed text-faint">
         JWT kimlik doğrulama · POST&nbsp;/auth/login
-        <br />
-        Dev demo: <span className="text-muted">admin / changeme123</span>
       </p>
     </AuthShell>
   );

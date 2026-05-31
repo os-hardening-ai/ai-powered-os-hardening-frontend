@@ -17,6 +17,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         {/* Public — JWT gerektirmez */}
+        <Route path="/" element={<WelcomeView />} />
         <Route path="/welcome" element={<WelcomeView />} />
         <Route path="/login" element={<LoginView />} />
         <Route path="/register" element={<RegisterView />} />
