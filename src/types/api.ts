@@ -15,6 +15,49 @@ export type SecurityLevel = "minimal" | "balanced" | "strict";
 export type ZtMaturity = "low" | "medium" | "high";
 export type ArtifactFormat = "bash" | "powershell" | "ansible" | "reg" | "gpo";
 
+// ── Auth (JWT + RBAC) — mirrors api/auth_models.py ───────────
+// NOTE: BACKEND RBAC roles (access control), distinct from the chat-prompt
+// `UserRole` hint above.
+export type Role = "sysadmin" | "security" | "developer" | "end_user";
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string; // "bearer"
+  role: Role;
+  expires_in: number; // seconds
+}
+
+export interface AuthUser {
+  username: string;
+  role: Role;
+}
+
+// ── Auth-UX (register / parola sıfırlama) — mirrors api/auth_models.py ──
+export interface RegisterRequest {
+  username: string; // 3..64
+  password: string; // 6..256
+}
+
+export interface ForgotPasswordRequest {
+  username: string;
+}
+
+export interface ForgotPasswordResponse {
+  message: string;
+  // DEV-mode'da reset token doğrudan döner (e-posta altyapısı yok); prod'da null.
+  reset_token?: string | null;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string; // 6..256
+}
+
 // ── /api/chat ────────────────────────────────────────────────
 export interface ChatRequest {
   question: string;
@@ -61,6 +104,7 @@ export interface ChatResponse {
   request_id?: string | null;
   estimated_cost?: number | null;
   verification_confidence?: number | null;
+  unsupported_claims?: string[] | null; // bağlamca desteklenmeyen iddialar (groundedness şeffaflığı)
 }
 
 // ── /api/chat/stream (SSE) ───────────────────────────────────
@@ -74,12 +118,17 @@ export interface StreamMetadata {
 // ── /rag/search ──────────────────────────────────────────────
 export interface RagSearchRequest {
   query: string;
-  top_k?: number;
+  top_k?: number;        // her kaynak (yaml_rule + cis_benchmark) için
+  min_score?: number;    // 0..1 (backend default 0.3)
 }
 
+// Backend api/schemas.py:RagSearchResponse ile birebir.
 export interface RagSearchResponse {
   query: string;
-  top_k: number;
+  top_k_per_source: number;
+  total_returned: number;
+  yaml_count: number;
+  pdf_count: number;
   results: RagSource[];
 }
 

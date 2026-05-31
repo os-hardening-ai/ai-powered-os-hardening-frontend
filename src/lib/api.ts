@@ -1,5 +1,5 @@
 import { apiRequest, streamUrl } from "@/lib/http";
-import { API_KEY } from "@/config";
+import { getToken, setToken, notifyUnauthorized } from "@/lib/auth-token";
 import type {
   AgentHardenRequest,
   AgentHardenResponse,
@@ -7,19 +7,54 @@ import type {
   AgentPlanResponse,
   ArtifactRequest,
   ArtifactResponse,
+  AuthUser,
   ChatRequest,
   ChatResponse,
   ExecutionPlanResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   HealthResponse,
+  LoginRequest,
   OsTarget,
   RagSearchRequest,
   RagSearchResponse,
   RagSource,
+  RegisterRequest,
+  ResetPasswordRequest,
   RuleConflict,
   RuleListParams,
   RuleListResponse,
   StreamMetadata,
+  TokenResponse,
 } from "@/types/api";
+
+// ── Auth ─────────────────────────────────────────────────────
+export function login(req: LoginRequest, signal?: AbortSignal): Promise<TokenResponse> {
+  return apiRequest<TokenResponse>("/auth/login", { method: "POST", body: req, signal });
+}
+
+export function register(req: RegisterRequest, signal?: AbortSignal): Promise<TokenResponse> {
+  return apiRequest<TokenResponse>("/auth/register", { method: "POST", body: req, signal });
+}
+
+export function forgotPassword(
+  req: ForgotPasswordRequest,
+  signal?: AbortSignal,
+): Promise<ForgotPasswordResponse> {
+  return apiRequest<ForgotPasswordResponse>("/auth/forgot-password", { method: "POST", body: req, signal });
+}
+
+export function resetPassword(req: ResetPasswordRequest, signal?: AbortSignal): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>("/auth/reset-password", { method: "POST", body: req, signal });
+}
+
+export function logout(signal?: AbortSignal): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>("/auth/logout", { method: "POST", signal });
+}
+
+export function getMe(signal?: AbortSignal): Promise<AuthUser> {
+  return apiRequest<AuthUser>("/auth/me", { method: "GET", signal });
+}
 
 // ── Chat ─────────────────────────────────────────────────────
 export function postChat(req: ChatRequest, signal?: AbortSignal): Promise<ChatResponse> {
@@ -50,7 +85,8 @@ export function streamChat(req: ChatRequest, handlers: StreamHandlers): () => vo
         "Content-Type": "application/json",
         Accept: "text/event-stream",
       };
-      if (API_KEY) streamHeaders["X-API-Key"] = API_KEY;
+      const token = getToken();
+      if (token) streamHeaders["Authorization"] = `Bearer ${token}`;
       const res = await fetch(streamUrl("/api/chat/stream"), {
         method: "POST",
         headers: streamHeaders,
@@ -58,6 +94,10 @@ export function streamChat(req: ChatRequest, handlers: StreamHandlers): () => vo
         signal: controller.signal,
       });
       if (!res.ok || !res.body) {
+        if (res.status === 401 && token) {
+          setToken(null);
+          notifyUnauthorized();
+        }
         handlers.onError?.(`Stream başlatılamadı (HTTP ${res.status}).`);
         return;
       }
@@ -153,18 +193,26 @@ export function listRules(params: RuleListParams = {}, signal?: AbortSignal): Pr
   });
 }
 
-export function getExecutionPlan(ruleIds: string[], signal?: AbortSignal): Promise<ExecutionPlanResponse> {
+export function getExecutionPlan(
+  ruleIds: string[],
+  osTarget?: OsTarget,
+  signal?: AbortSignal,
+): Promise<ExecutionPlanResponse> {
   return apiRequest<ExecutionPlanResponse>("/api/rules/plan", {
     method: "POST",
-    body: { rule_ids: ruleIds },
+    body: { rule_ids: ruleIds, ...(osTarget ? { os_target: osTarget } : {}) },
     signal,
   });
 }
 
-export function detectConflicts(ruleIds: string[], signal?: AbortSignal): Promise<RuleConflict[]> {
+export function detectConflicts(
+  ruleIds: string[],
+  osTarget?: OsTarget,
+  signal?: AbortSignal,
+): Promise<RuleConflict[]> {
   return apiRequest<RuleConflict[]>("/api/rules/conflicts", {
     method: "POST",
-    body: { rule_ids: ruleIds },
+    body: { rule_ids: ruleIds, ...(osTarget ? { os_target: osTarget } : {}) },
     signal,
   });
 }

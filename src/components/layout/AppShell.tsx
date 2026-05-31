@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
 import { NavLink } from "react-router-dom";
-import { Boxes, Bot, LayoutDashboard, MessagesSquare, Search, ShieldCheck } from "lucide-react";
+import { Boxes, Bot, LayoutDashboard, LogOut, MessagesSquare, Search, ShieldCheck, UserRound } from "lucide-react";
 import { useHealth } from "@/hooks/useHealth";
+import { useAuth } from "@/context/AuthContext";
 
 const NAV = [
   { to: "/chat", label: "Asistan", icon: MessagesSquare },
@@ -67,6 +68,7 @@ function Sidebar() {
 
 function TopBar() {
   const { state } = useHealth();
+  const { user, logout } = useAuth();
   const dot: Record<string, string> = {
     checking: "bg-warn",
     online: "bg-accent",
@@ -85,9 +87,26 @@ function TopBar() {
       <p className="font-mono text-xs uppercase tracking-wider text-faint">
         RAG · Rule Engine · Artifact Generator
       </p>
-      <div className="flex items-center gap-2 rounded-full border border-line bg-surface-2 px-3 py-1">
-        <span className={`h-2 w-2 rounded-full ${dot[state]} ${state === "online" ? "animate-pulse" : ""}`} />
-        <span className="font-mono text-[11px] uppercase tracking-wider text-muted">{label[state]}</span>
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 rounded-full border border-line bg-surface-2 px-3 py-1">
+          <span className={`h-2 w-2 rounded-full ${dot[state]} ${state === "online" ? "animate-pulse" : ""}`} />
+          <span className="font-mono text-[11px] uppercase tracking-wider text-muted">{label[state]}</span>
+        </div>
+        {user && (
+          <div className="flex items-center gap-1.5 rounded-full border border-line bg-surface-2 py-1 pl-3 pr-1">
+            <UserRound size={13} className="text-faint" />
+            <span className="font-mono text-[11px] text-muted">
+              {user.username}<span className="text-faint"> · {user.role}</span>
+            </span>
+            <button
+              onClick={() => void logout()}
+              title="Çıkış yap"
+              className="ml-1 flex h-6 w-6 items-center justify-center rounded-full text-faint transition-colors hover:bg-danger/10 hover:text-danger"
+            >
+              <LogOut size={13} />
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );
