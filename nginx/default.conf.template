@@ -24,8 +24,8 @@ server {
     }
 
     # ── API reverse proxy → backend (same-origin, so no CORS) ──
-    # Covers /api, /api/chat/stream, /auth (login/register/forgot), /rag, /health, /metrics.
-    location ~ ^/(api|auth|rag|health|metrics)(/|$) {
+    # Covers /api, /api/chat/stream, /auth, /rag, /health, /metrics, /docs+/redoc+/openapi.json (Swagger).
+    location ~ ^/(api|auth|rag|health|metrics|docs|redoc|openapi\.json)(/|$) {
         proxy_pass ${BACKEND_URL};
         proxy_http_version 1.1;
         proxy_set_header Host $host;
