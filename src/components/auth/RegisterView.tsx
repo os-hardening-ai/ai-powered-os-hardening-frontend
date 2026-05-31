@@ -13,6 +13,7 @@ export function RegisterView() {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -24,11 +25,13 @@ export function RegisterView() {
   const validation =
     username.trim().length < MIN_USERNAME
       ? `Kullanıcı adı en az ${MIN_USERNAME} karakter olmalı.`
-      : password.length < MIN_PASSWORD
-        ? `Parola en az ${MIN_PASSWORD} karakter olmalı.`
-        : password !== confirm
-          ? "Parolalar eşleşmiyor."
-          : null;
+      : !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())
+        ? "Geçerli bir e-posta adresi gir."
+        : password.length < MIN_PASSWORD
+          ? `Parola en az ${MIN_PASSWORD} karakter olmalı.`
+          : password !== confirm
+            ? "Parolalar eşleşmiyor."
+            : null;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -39,7 +42,7 @@ export function RegisterView() {
     setError(null);
     setSubmitting(true);
     try {
-      await register(username.trim(), password);
+      await register(username.trim(), password, email.trim());
       navigate("/chat", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kayıt başarısız.");
@@ -71,6 +74,14 @@ export function RegisterView() {
           value={username}
           onChange={setUsername}
           hint={`En az ${MIN_USERNAME} karakter`}
+        />
+        <AuthField
+          label="E-posta"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={setEmail}
+          hint="Parola sıfırlama bu adrese gönderilir"
         />
         <AuthField
           label="Parola"

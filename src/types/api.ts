@@ -41,6 +41,7 @@ export interface AuthUser {
 export interface RegisterRequest {
   username: string; // 3..64
   password: string; // 6..256
+  email: string;    // parola sıfırlama e-postası buraya gider
 }
 
 export interface ForgotPasswordRequest {

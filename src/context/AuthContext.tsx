@@ -17,7 +17,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   status: AuthStatus;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string, email: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -68,8 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Kayıt → backend otomatik giriş yapar (token döner) → oturumu aç.
-  const register = useCallback(async (username: string, password: string) => {
-    const res = await apiRegister({ username, password });
+  const register = useCallback(async (username: string, password: string, email: string) => {
+    const res = await apiRegister({ username, password, email });
     setToken(res.access_token);
     setUser({ username, role: res.role });
     setStatus("authenticated");

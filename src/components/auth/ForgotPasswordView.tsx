@@ -131,8 +131,9 @@ export function ForgotPasswordView() {
             label="Sıfırlama token'ı"
             value={token}
             onChange={setToken}
+            autoComplete="off"
             autoFocus={!token}
-            hint="Dev ortamda otomatik dolduruldu; prod'da e-postandaki token."
+            hint="E-postana gönderilen token'ı yapıştır (dev ortamda otomatik dolar)."
           />
           <AuthField
             label="Yeni parola"
@@ -164,7 +165,7 @@ export function ForgotPasswordView() {
       )}
 
       <p className="mt-4 font-mono text-[10px] leading-relaxed text-faint">
-        Tez kapsamı: e-posta altyapısı yok · dev'de token yanıtta döner · POST&nbsp;/auth/forgot-password
+        Token e-postana gönderilir (SMTP) · dev'de yanıtta döner · POST&nbsp;/auth/forgot-password
       </p>
     </AuthShell>
   );
