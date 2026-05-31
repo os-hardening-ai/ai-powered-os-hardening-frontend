@@ -1,4 +1,5 @@
-import { API_BASE_URL, API_KEY } from "@/config";
+import { API_BASE_URL } from "@/config";
+import { getToken, setToken, notifyUnauthorized } from "@/lib/auth-token";
 import type { ApiErrorShape } from "@/types/api";
 
 export class ApiError extends Error implements ApiErrorShape {
@@ -96,14 +97,23 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
   try {
     const headers: Record<string, string> = {};
     if (body) headers["Content-Type"] = "application/json";
-    if (API_KEY) headers["X-API-Key"] = API_KEY;
+    const token = getToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     const res = await fetch(buildUrl(path, query), {
       method,
       headers: Object.keys(headers).length ? headers : undefined,
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
-    if (!res.ok) throw await normalizeError(res);
+    if (!res.ok) {
+      // Token vardı ama reddedildiyse (süresi dolmuş/iptal) → oturumu kapat + login'e yönlendir.
+      // (Login isteğinde token yoktur; oradaki 401 = hatalı parola → otomatik logout YAPMA.)
+      if (res.status === 401 && token) {
+        setToken(null);
+        notifyUnauthorized();
+      }
+      throw await normalizeError(res);
+    }
     if (res.status === 204) return undefined as T;
     return (await res.json()) as T;
   } catch (err) {
