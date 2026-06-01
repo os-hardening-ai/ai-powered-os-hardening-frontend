@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { MessagesSquare, RotateCcw, Sparkles } from "lucide-react";
 import { DEFAULT_SETTINGS, useChat, type ChatSettings } from "@/hooks/useChat";
-import { useAuth } from "@/context/AuthContext";
-import { defaultExpertModeForRole } from "@/lib/permissions";
 import { MessageBubble } from "./MessageBubble";
 import { Composer } from "./Composer";
 import { ContextControls } from "./ContextControls";
@@ -10,13 +8,7 @@ import { EmptyState, ErrorBanner } from "@/components/ui/ui";
 
 export function ChatView() {
   const { messages, busy, error, send, stop, reset } = useChat();
-  const { user } = useAuth();
-  // Başlangıç "Yanıt modu" rol'e göre: IT/uzman roller → Hızlı RAG, end_user → Tam (akıllı).
-  // Yalnız ilk değer; kullanıcı ContextControls'taki seçiciyle değiştirebilir.
-  const [settings, setSettings] = useState<ChatSettings>(() => ({
-    ...DEFAULT_SETTINGS,
-    expertMode: defaultExpertModeForRole(user?.role),
-  }));
+  const [settings, setSettings] = useState<ChatSettings>(DEFAULT_SETTINGS);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

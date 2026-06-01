@@ -62,17 +62,6 @@ export function postChat(req: ChatRequest, signal?: AbortSignal): Promise<ChatRe
   return apiRequest<ChatResponse>("/api/chat", { method: "POST", body: req, signal, timeoutMs });
 }
 
-/**
- * "Hızlı RAG" yanıtı (non-stream) — /api/chat/fast. Tam pipeline'ı (intent routing,
- * smalltalk, complexity, doğrulama) ATLAR; doğrudan RAG-grounded üretim. RAG yine
- * kullanılır (fark RAG'de değil, yönlendirme+hızda). Streaming KAPALI + "Hızlı RAG"
- * modunda useChat bu uca düşer.
- */
-export function postChatFast(req: ChatRequest, signal?: AbortSignal): Promise<ChatResponse> {
-  const timeoutMs = (req.timeout ?? 60) * 1000 + 5_000;
-  return apiRequest<ChatResponse>("/api/chat/fast", { method: "POST", body: req, signal, timeoutMs });
-}
-
 export interface StreamHandlers {
   onMetadata?: (m: StreamMetadata) => void;
   onSources?: (sources: RagSource[]) => void;
@@ -81,23 +70,13 @@ export interface StreamHandlers {
   onError?: (message: string) => void;
 }
 
-// Hangi SSE chat akışı kullanılsın:
-//   "/api/chat/stream"      → tam SecurePipelineV2 (intent routing + smalltalk +
-//                             complexity + verification). VARSAYILAN — "akıllı" mod.
-//   "/api/chat/stream/fast" → RAG-temelli gerçek-token akış, intent routing YOK
-//                             ("uzman/konsol" modu — her girdi güvenlik sorusu sayılır).
-export type ChatStreamPath = "/api/chat/stream" | "/api/chat/stream/fast";
-
 /**
- * Consumes a backend SSE chat stream. Because the endpoints are POST returning
- * text/event-stream, we read the body with a streaming fetch + manual SSE frame
- * parser (EventSource only supports GET). Returns an abort function.
+ * Consumes the backend SSE chat stream (`/api/chat/stream` — full SecurePipelineV2:
+ * intent routing + smalltalk + complexity + verification). Because the endpoint is a
+ * POST returning text/event-stream, we read the body with a streaming fetch + manual
+ * SSE frame parser (EventSource only supports GET). Returns an abort function.
  */
-export function streamChat(
-  req: ChatRequest,
-  handlers: StreamHandlers,
-  path: ChatStreamPath = "/api/chat/stream",
-): () => void {
+export function streamChat(req: ChatRequest, handlers: StreamHandlers): () => void {
   const controller = new AbortController();
 
   (async () => {
@@ -108,7 +87,7 @@ export function streamChat(
       };
       const token = getToken();
       if (token) streamHeaders["Authorization"] = `Bearer ${token}`;
-      const res = await fetch(streamUrl(path), {
+      const res = await fetch(streamUrl("/api/chat/stream"), {
         method: "POST",
         headers: streamHeaders,
         body: JSON.stringify({ ...req, stream: true }),

@@ -20,14 +20,9 @@ export function ContextControls({
 
   const ztDesc = ZT_MATURITY_OPTIONS.find((o) => o.value === settings.zt_maturity)?.description;
 
-  // stream × mod → çağrılacak gerçek endpoint (useChat ile aynı eşleme).
-  const activeEndpoint = settings.stream
-    ? settings.expertMode
-      ? "/api/chat/stream/fast"
-      : "/api/chat/stream"
-    : settings.expertMode
-      ? "/api/chat/fast"
-      : "/api/chat";
+  // streaming aç/kapa → çağrılacak endpoint (useChat ile aynı). Her ikisi de tam
+  // SecurePipelineV2 (intent routing + smalltalk + complexity + doğrulama).
+  const activeEndpoint = settings.stream ? "/api/chat/stream" : "/api/chat";
 
   return (
     <div className="space-y-4">
@@ -120,35 +115,15 @@ export function ContextControls({
               </div>
             )}
 
-            {/* Yanıt modu — HER İKİ MOD DA RAG kullanır; fark RAG'de değil, yönlendirme+hızda:
-                  Tam (akıllı) → /api/chat[/stream]      (intent routing + smalltalk + complexity + doğrulama)
-                  Hızlı RAG    → /api/chat/fast[/stream]  (routing yok, doğrudan RAG-grounded üretim) */}
-            <Select<"full" | "fast">
-              label="Yanıt modu"
-              value={settings.expertMode ? "fast" : "full"}
-              onChange={(v) => set("expertMode", v === "fast")}
-              options={[
-                { value: "full", label: "Tam (akıllı) — önerilen" },
-                { value: "fast", label: "Hızlı RAG" },
-              ]}
-            />
-            <p className="font-mono text-[10px] leading-relaxed text-faint">
-              {settings.expertMode
-                ? "Hızlı RAG: RAG + doğrudan üretim; yönlendirme atlanır → en hızlı ilk-token. Her girdi güvenlik sorusu sayılır (selam/naber yönlendirmesi yok)."
-                : "Tam (akıllı): RAG + selam/naber yönlendirmesi + soru karmaşıklığına göre model + iddia doğrulaması. İkisi de CIS kaynaklarını kullanır."}
-            </p>
-
-            {/* Streaming — gerçek ürünlerde gizli/hep-açık olur ama konsol/değerlendirme
-                için kapatılabilir bırakıldı. Kapalıyken bile 'Hızlı RAG' modu çalışır
-                (non-stream /api/chat/fast). */}
+            {/* Streaming — açık: /api/chat/stream (SSE), kapalı: /api/chat. İkisi de
+                tam SecurePipelineV2 (intent routing + smalltalk + complexity + doğrulama). */}
             <Toggle
               label="Streaming (SSE)"
               checked={settings.stream}
               onChange={(v) => set("stream", v)}
             />
 
-            {/* Aktif uç — request GÖVDESİ 4 uçta da AYNI (ChatRequest); değişen yalnız
-                hangi endpoint'e gidildiği (stream × mod). Şeffaflık için gösterilir. */}
+            {/* Aktif uç — request gövdesi aynı (ChatRequest); değişen yalnız stream aç/kapa. */}
             <div className="rounded-lg border border-line bg-bg/40 px-3 py-2">
               <p className="label normal-case tracking-normal text-faint">Aktif uç</p>
               <code className="mt-0.5 block font-mono text-[11px] text-accent">

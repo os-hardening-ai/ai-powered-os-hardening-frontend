@@ -26,14 +26,3 @@ export function canAccess(path: string, role?: Role | null): boolean {
   if (!allowed) return true; // kısıtsız (chat, retrieval)
   return !!role && allowed.includes(role);
 }
-
-// "Hızlı RAG" modunu VARSAYILAN açık getirecek roller. IT/uzman roller (sysadmin,
-// security, developer) genelde hep güvenlik sorusu sorar → hız + doğrudan RAG mantıklı.
-// end_user smalltalk da yapabilir → "Tam (akıllı)" varsayılan onun için daha doğru.
-// NOT: bu yalnız BAŞLANGIÇ varsayılanıdır; kullanıcı "Yanıt modu" seçicisiyle değiştirebilir.
-const EXPERT_DEFAULT_ROLES: Role[] = ["sysadmin", "security", "developer"];
-
-/** Rol için "Hızlı RAG" modu varsayılan açık mı gelsin? (yalnız ilk değer) */
-export function defaultExpertModeForRole(role?: Role | null): boolean {
-  return !!role && EXPERT_DEFAULT_ROLES.includes(role);
-}
