@@ -35,17 +35,27 @@ export function ContextControls({
       <div>
         <p className="label mb-2">Bağlam</p>
         <div className="space-y-3">
-          <Select<OsTarget>
+          {/* "Otomatik" → null gönderir → backend FilterAgent (LLM) os/rol'ü SORUDAN
+              çıkarır. Boş gönderilmezse (sabit değer) FilterAgent hiç çalışmaz; bu yüzden
+              "akıllı" param-çıkarımı yalnız Otomatik seçilince devreye girer.
+              stats.inferred_os ile ne çıkarıldığı yanıtta görülebilir. */}
+          <Select<OsTarget | "auto">
             label="İşletim sistemi"
-            value={(settings.os ?? "ubuntu_24_04") as OsTarget}
-            onChange={(v) => set("os", v)}
-            options={OS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+            value={settings.os ?? "auto"}
+            onChange={(v) => set("os", v === "auto" ? null : v)}
+            options={[
+              { value: "auto", label: "Otomatik (sorudan algıla)" },
+              ...OS_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+            ]}
           />
-          <Select<UserRole>
+          <Select<UserRole | "auto">
             label="Rol"
-            value={(settings.role ?? "sysadmin") as UserRole}
-            onChange={(v) => set("role", v)}
-            options={ROLE_OPTIONS}
+            value={settings.role ?? "auto"}
+            onChange={(v) => set("role", v === "auto" ? null : v)}
+            options={[
+              { value: "auto", label: "Otomatik (sorudan algıla)" },
+              ...ROLE_OPTIONS,
+            ]}
           />
           <Select<SecurityLevel>
             label="Güvenlik seviyesi"
