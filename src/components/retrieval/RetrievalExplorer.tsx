@@ -136,6 +136,7 @@ function ChunkCard({ index, chunk }: { index: number; chunk: RagSource }) {
 export function RetrievalExplorer() {
   const [query, setQuery] = useState("");
   const [topK, setTopK] = useState(5);
+  const [minScore, setMinScore] = useState(0.3); // backend /rag/search varsayılanı
   const [results, setResults] = useState<RagSource[] | null>(null);
   const [lastQuery, setLastQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -147,7 +148,8 @@ export function RetrievalExplorer() {
     setLoading(true);
     setError(null);
     try {
-      const res = await ragSearch({ query: q, top_k: topK });
+      // min_score > 0 ise gönder (0 = filtre yok). top_k her kaynak (yaml+pdf) için.
+      const res = await ragSearch({ query: q, top_k: topK, min_score: minScore > 0 ? minScore : undefined });
       setResults(res.results);
       setLastQuery(res.query);
     } catch (e) {
@@ -196,6 +198,21 @@ export function RetrievalExplorer() {
               max={20}
               value={topK}
               onChange={(e) => setTopK(Number(e.target.value))}
+              className="w-20 accent-accent"
+            />
+          </label>
+
+          <label className="flex items-center gap-2 shrink-0" title="Minimum benzerlik skoru — altındaki chunk'lar elenir (0 = filtre yok)">
+            <span className="label whitespace-nowrap text-muted">
+              min skor: <span className={minScore > 0 ? "text-accent" : "text-faint"}>{minScore > 0 ? minScore.toFixed(2) : "kapalı"}</span>
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={0.9}
+              step={0.05}
+              value={minScore}
+              onChange={(e) => setMinScore(Number(e.target.value))}
               className="w-20 accent-accent"
             />
           </label>
