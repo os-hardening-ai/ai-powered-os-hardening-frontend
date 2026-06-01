@@ -232,6 +232,10 @@ export function agentHarden(req: AgentHardenRequest, signal?: AbortSignal): Prom
 }
 
 // ── System ───────────────────────────────────────────────────
+// /health (public) → { status, rag_available, dependencies: {qdrant, llm, redis} }.
+// /health/detailed → { status, components: {vector_store, embedding, llm} } — 'dependencies' YOK.
+// Pano "Servis Durumu" paneli dependencies (qdrant/llm/redis) okuduğundan /health kullanılır;
+// rag_available de doğrudan burada gelir (detailed'da yok, fallback gerekirdi).
 export function getHealth(signal?: AbortSignal): Promise<HealthResponse> {
-  return apiRequest<HealthResponse>("/health/detailed", { method: "GET", signal, timeoutMs: 10_000 });
+  return apiRequest<HealthResponse>("/health", { method: "GET", signal, timeoutMs: 10_000 });
 }
