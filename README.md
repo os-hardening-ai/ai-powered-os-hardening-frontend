@@ -11,7 +11,15 @@ web istemcisidir. Üç ana iş akışı sunar:
    altında kullanılan kaynaklar (rule ID / section) **Evidence** olarak gösterilir.
 2. **Kurallar** — CIS kural kütüphanesini filtrele/ara, kural seç, çakışma planı çıkar ve **hardening script**
    (Bash / PowerShell / Ansible / REG / GPO) üret + indir.
-3. **Pano** — Backend sağlık durumu ve performans metrikleri (gecikme, istek, token, sağlayıcı dağılımı).
+3. **Pano** — Backend sağlık + performans metrikleri:
+   - **Servis Durumu** (Qdrant / LLM / Redis — `/health` `dependencies`, renkli ok/disabled/danger)
+   - **Gecikme dağılımı** (p50/p95/p99), **Token/istek**, **Toplam istek/hata oranı**
+   - **LLM Lane Sağlık** — her `provider:model` lane için **✓başarılı / ✗hata (kırmızı) / ort. gecikme**;
+     fail eden lane (success=0 olsa bile) kırmızı görünür → "istek gitmedi mi?" yanılgısını önler
+     (`/metrics` `llm_providers` + `llm_lane_failures` + `llm_lane_latency_ms`, backend lane load-balancer)
+   - **Endpoint gecikme** — chat / agent / rules / rag grubu bazlı avg+p95+count (`latency_by_endpoint`)
+   > `/metrics` arka-plan poll'u **401'de oturumu KAPATMAZ** (`noLogoutOn401`) → yetkili kullanıcıya
+   > Pano'da "şifre penceresi" açılmaz.
 
 ---
 
