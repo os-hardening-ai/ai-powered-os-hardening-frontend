@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Activity, Cpu, Gauge, Server, Timer } from "lucide-react";
 import { apiRequest } from "@/lib/http";
 import { useHealth } from "@/hooks/useHealth";
-import { Badge, Card } from "@/components/ui/ui";
+import { Card } from "@/components/ui/ui";
 
 interface Metrics {
   requests: { total: number; successful: number; failed: number; error_rate: number };
@@ -36,6 +36,20 @@ export function DashboardView() {
   const stateLabel: Record<string, string> = { checking: "kontrol ediliyor", online: "çevrimiçi", degraded: "kısıtlı", offline: "çevrimdışı" };
   const stateColor: Record<string, string> = { checking: "text-warn", online: "text-accent", degraded: "text-warn", offline: "text-danger" };
 
+  // Servis durumu: /health/detailed → dependencies (qdrant/llm/redis). Renk + Türkçe etiket.
+  const svcMeta: Record<string, { dot: string; label: string }> = {
+    ok: { dot: "bg-accent", label: "çalışıyor" },
+    disabled: { dot: "bg-faint", label: "devre dışı" },
+    degraded: { dot: "bg-warn", label: "kısıtlı" },
+    checking: { dot: "bg-warn animate-pulse", label: "kontrol ediliyor" },
+  };
+  const svc = (s?: string) => svcMeta[s ?? ""] ?? { dot: "bg-danger", label: s || "bilinmiyor" };
+  const SERVICES: { key: string; label: string }[] = [
+    { key: "qdrant", label: "Qdrant (vektör DB)" },
+    { key: "llm", label: "LLM sağlayıcı" },
+    { key: "redis", label: "Redis (cache/oturum)" },
+  ];
+
   return (
     <div className="h-full space-y-4 overflow-y-auto">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -65,6 +79,31 @@ export function DashboardView() {
           sub={metrics ? `toplam ${metrics.tokens.total}` : undefined}
         />
       </div>
+
+      {/* Servis Durumu — qdrant / llm / redis (her zaman görünür, renkli) */}
+      <Card className="p-4">
+        <h3 className="label mb-3 flex items-center gap-2">
+          <Server size={14} /> Servis Durumu
+        </h3>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {SERVICES.map(({ key, label }) => {
+            const st = dependencies[key] ?? (state === "checking" ? "checking" : "unknown");
+            const m = svc(st);
+            return (
+              <div
+                key={key}
+                className="flex items-center gap-2.5 rounded-lg border border-line bg-bg/40 px-3 py-2"
+              >
+                <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${m.dot}`} />
+                <div className="min-w-0 leading-tight">
+                  <p className="truncate font-mono text-xs text-ink">{label}</p>
+                  <p className="font-mono text-[10px] text-faint">{m.label}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
 
       {err && (
         <Card className="p-4 text-sm text-faint">
@@ -115,21 +154,6 @@ export function DashboardView() {
         </Card>
       </div>
 
-      {Object.keys(dependencies).length > 0 && (
-        <Card className="p-4">
-          <h3 className="label mb-3">Bağımlılık durumu</h3>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(dependencies).map(([name, status]) => (
-              <Badge
-                key={name}
-                tone={status === "ok" ? "accent" : status === "disabled" ? "muted" : "danger"}
-              >
-                {name}: {status}
-              </Badge>
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }
