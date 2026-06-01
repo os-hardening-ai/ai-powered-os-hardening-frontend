@@ -89,7 +89,7 @@ export function WelcomeView() {
         </span>
         <h1 className="max-w-3xl text-3xl font-semibold leading-tight text-ink sm:text-5xl">
           İşletim sistemi sıkılaştırması için{" "}
-          <span className="text-accent">yapay zeka destekli karar desteği</span>
+          <span className="text-accent">yapay zekâ tabanlı karar desteği</span>
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
           CIS Benchmark, NIST SP 800-207 ve ISO 27001 kaynaklarından beslenen bir RAG sistemi;
