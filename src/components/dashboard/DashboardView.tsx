@@ -20,7 +20,9 @@ export function DashboardView() {
   useEffect(() => {
     let active = true;
     const tick = () =>
-      apiRequest<Metrics>("/metrics", { timeoutMs: 8000 })
+      // noLogoutOn401: bu arka-plan metrik poll'ü 401 alsa bile kullanıcıyı login'e ATMASIN
+      // (Pano'da "şifre penceresi" açılmasını önler) — sadece banner'da hata gösterilir.
+      apiRequest<Metrics>("/metrics", { timeoutMs: 8000, noLogoutOn401: true })
         .then((m) => active && (setMetrics(m), setErr(null)))
         .catch((e) => active && setErr(e.message));
     tick();
