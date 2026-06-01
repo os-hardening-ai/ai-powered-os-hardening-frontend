@@ -28,7 +28,7 @@ export function ChatView() {
             disabled={messages.length === 0}
             className="flex items-center gap-1.5 text-xs text-muted hover:text-accent disabled:opacity-30"
           >
-            <RotateCcw size={13} /> Yeni oturum
+            <RotateCcw size={13} /> Yeni sohbet
           </button>
         </header>
 
