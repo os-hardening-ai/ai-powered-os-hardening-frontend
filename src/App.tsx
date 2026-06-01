@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { RoleRoute } from "@/components/auth/RoleRoute";
 import { LoginView } from "@/components/auth/LoginView";
 import { RegisterView } from "@/components/auth/RegisterView";
 import { ForgotPasswordView } from "@/components/auth/ForgotPasswordView";
@@ -32,9 +33,10 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<Navigate to="/chat" replace />} />
                   <Route path="/chat" element={<ChatView />} />
-                  <Route path="/rules" element={<RulesView />} />
-                  <Route path="/agent" element={<AgentView />} />
-                  <Route path="/dashboard" element={<DashboardView />} />
+                  {/* Rol gate'li — yetkisiz kullanıcı /chat'e yönlendirilir (RoleRoute) */}
+                  <Route path="/rules" element={<RoleRoute path="/rules"><RulesView /></RoleRoute>} />
+                  <Route path="/agent" element={<RoleRoute path="/agent"><AgentView /></RoleRoute>} />
+                  <Route path="/dashboard" element={<RoleRoute path="/dashboard"><DashboardView /></RoleRoute>} />
                   <Route path="/retrieval" element={<RetrievalExplorer />} />
                   <Route path="/rag-test" element={<Navigate to="/retrieval" replace />} />
                   <Route path="*" element={<Navigate to="/chat" replace />} />

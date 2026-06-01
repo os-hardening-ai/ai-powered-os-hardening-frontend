@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { postChat, streamChat } from "@/lib/api";
+import { postChat, postChatFast, streamChat } from "@/lib/api";
 import { ApiError } from "@/lib/http";
 import { newSessionId } from "@/lib/format";
 import type {
@@ -22,6 +22,13 @@ export interface ChatSettings {
   rag_top_k: number;
   rag_min_score: number;
   stream: boolean;
+  /**
+   * Streaming modunda uç seçimi:
+   *   false → /api/chat/stream      (akıllı: intent routing + smalltalk + complexity)
+   *   true  → /api/chat/stream/fast (uzman: RAG-temelli gerçek-token, routing yok)
+   * Yalnız `stream === true` iken anlamlıdır.
+   */
+  expertMode: boolean;
 }
 
 export interface ChatMessage {
@@ -51,6 +58,7 @@ export const DEFAULT_SETTINGS: ChatSettings = {
   rag_top_k: 3,
   rag_min_score: 0.5,
   stream: true,
+  expertMode: false,
 };
 
 let idSeq = 0;
@@ -99,6 +107,9 @@ export function useChat() {
       if (settings.stream) {
         let streamMeta: StreamMetadata = {};
         let streamSources: RagSource[] = [];
+        // Uzman modu → /api/chat/stream/fast (RAG-temelli, intent routing yok),
+        // aksi halde akıllı tam pipeline → /api/chat/stream.
+        const streamPath = settings.expertMode ? "/api/chat/stream/fast" : "/api/chat/stream";
         const stop = streamChat(req, {
           onMetadata: (m) => {
             streamMeta = m;
@@ -146,11 +157,12 @@ export function useChat() {
                 abortRef.current = null;
               });
           },
-        });
+        }, streamPath);
         abortRef.current = stop;
       } else {
         try {
-          const res = await postChat(req);
+          // Streaming kapalı: "Hızlı RAG" modu → /api/chat/fast, aksi halde tam pipeline → /api/chat
+          const res = settings.expertMode ? await postChatFast(req) : await postChat(req);
           applyFullResponse(assistantId, res);
         } catch (e) {
           setError(e instanceof ApiError ? e : new ApiError({ status: 0, code: "UNKNOWN", message: String(e) }));

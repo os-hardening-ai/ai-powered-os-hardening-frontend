@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import { Boxes, Bot, LayoutDashboard, LogOut, MessagesSquare, Search, ShieldCheck, UserRound } from "lucide-react";
 import { useHealth } from "@/hooks/useHealth";
 import { useAuth } from "@/context/AuthContext";
+import { canAccess } from "@/lib/permissions";
 
 const NAV = [
   { to: "/chat", label: "Asistan", icon: MessagesSquare },
@@ -25,6 +26,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function Sidebar() {
+  const { user } = useAuth();
+  // Yetkisiz roller, backend'in 403 döneceği sayfaları (Pano/Kurallar/Agent) NAV'da
+  // GÖRMESİN — link yoksa yanlışlıkla tıklayıp spurious logout/403 yaşamaz.
+  const nav = NAV.filter(({ to }) => canAccess(to, user?.role));
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-surface/60 px-3 py-4 backdrop-blur md:flex">
       <div className="mb-6 flex items-center gap-2.5 px-2">
@@ -38,7 +43,7 @@ function Sidebar() {
       </div>
 
       <nav className="flex flex-col gap-1">
-        {NAV.map(({ to, label, icon: Icon }) => (
+        {nav.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}
