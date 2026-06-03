@@ -200,5 +200,14 @@ export function useChat() {
     setBusy(false);
   }, []);
 
-  return { messages, busy, error, send, stop, reset };
+  const loadSession = useCallback((msgs: ChatMessage[]) => {
+    abortRef.current?.();
+    abortRef.current = null;
+    sessionId.current = newSessionId();
+    setMessages(msgs.map((m) => ({ ...m, streaming: false })));
+    setError(null);
+    setBusy(false);
+  }, []);
+
+  return { messages, busy, error, send, stop, reset, loadSession };
 }
