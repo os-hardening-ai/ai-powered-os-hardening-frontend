@@ -1,4 +1,5 @@
-import { API_BASE_URL, API_KEY } from "@/config";
+import { API_BASE_URL } from "@/config";
+import { getToken, setToken, notifyUnauthorized } from "@/lib/auth-token";
 import type { ApiErrorShape } from "@/types/api";
 
 export class ApiError extends Error implements ApiErrorShape {
@@ -23,6 +24,13 @@ interface RequestOptions {
   query?: Record<string, string | number | boolean | undefined>;
   signal?: AbortSignal;
   timeoutMs?: number;
+  /**
+   * 401'de OTURUMU KAPATMA. Arka-plan/ikincil pollar (örn. Pano /metrics) için: geçici
+   * bir 401 (token süresi, reverse-proxy auth tutarsızlığı vb.) yüzünden kullanıcı login'e
+   * atılmasın — sadece hata fırlat, çağıran banner gösterir. Birincil çağrılar (chat) bunu
+   * KULLANMAZ → onlarda 401 hâlâ doğru şekilde oturumu kapatır.
+   */
+  noLogoutOn401?: boolean;
 }
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
@@ -86,7 +94,7 @@ async function normalizeError(res: Response): Promise<ApiError> {
 }
 
 export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Promise<T> {
-  const { method = "GET", body, query, signal, timeoutMs = 65_000 } = opts;
+  const { method = "GET", body, query, signal, timeoutMs = 65_000, noLogoutOn401 = false } = opts;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -96,14 +104,25 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
   try {
     const headers: Record<string, string> = {};
     if (body) headers["Content-Type"] = "application/json";
-    if (API_KEY) headers["X-API-Key"] = API_KEY;
+    const token = getToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
     const res = await fetch(buildUrl(path, query), {
       method,
       headers: Object.keys(headers).length ? headers : undefined,
       body: body ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
-    if (!res.ok) throw await normalizeError(res);
+    if (!res.ok) {
+      // Token vardı ama reddedildiyse (süresi dolmuş/iptal) → oturumu kapat + login'e yönlendir.
+      // (Login isteğinde token yoktur; oradaki 401 = hatalı parola → otomatik logout YAPMA.)
+      // noLogoutOn401: arka-plan poll'ları (Pano /metrics) için logout'u atla — geçici 401
+      // kullanıcıyı login'e ("şifre penceresi") atmasın; çağıran sadece hata banner'ı gösterir.
+      if (res.status === 401 && token && !noLogoutOn401) {
+        setToken(null);
+        notifyUnauthorized();
+      }
+      throw await normalizeError(res);
+    }
     if (res.status === 204) return undefined as T;
     return (await res.json()) as T;
   } catch (err) {

@@ -1,7 +1,7 @@
 import type { OsTarget, UserRole, SecurityLevel, ArtifactFormat, ZtMaturity } from "@/types/api";
 
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
-export const API_KEY = (import.meta.env.VITE_API_KEY ?? "").trim();
+// Auth: JWT Bearer (POST /auth/login → token). X-API-Key kaldırıldı.
 
 export const OS_OPTIONS: { value: OsTarget; label: string; family: "linux" | "windows" }[] = [
   { value: "ubuntu_24_04", label: "Ubuntu 24.04 LTS", family: "linux" },

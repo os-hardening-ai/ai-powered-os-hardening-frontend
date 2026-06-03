@@ -40,7 +40,7 @@ export function ArtifactBuilder({
     setBusy("plan");
     setError(null);
     try {
-      setPlan(await getExecutionPlan(selectedIds));
+      setPlan(await getExecutionPlan(selectedIds, os));
     } catch (e) {
       setError(e instanceof ApiError ? e : new ApiError({ status: 0, code: "UNKNOWN", message: String(e) }));
     } finally {

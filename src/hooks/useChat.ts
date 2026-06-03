@@ -43,8 +43,11 @@ export interface ChatMessage {
 }
 
 export const DEFAULT_SETTINGS: ChatSettings = {
-  os: "ubuntu_24_04",
-  role: "sysadmin",
+  // OS + Rol VARSAYILAN "Otomatik" (null) → backend FilterAgent (LLM) bunları SORUDAN
+  // çıkarır (akıllı pipeline'ın amacı). Kullanıcı isterse seçiciden sabitleyebilir.
+  // (Güvenlik seviyesi + ZT çıkarsanamaz → kullanıcı tercihi olarak sabit varsayılanlı kalır.)
+  os: null,
+  role: null,
   security_level: "balanced",
   zt_maturity: "medium",
   use_rag: true,
