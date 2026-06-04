@@ -26,19 +26,23 @@ Tip tanımları backend Pydantic şemalarından türetilmiştir (kontrat birebir
 
 ## 4. Backend entegrasyonu
 Dev'de Vite proxy (`VITE_API_PROXY_TARGET`) `/api`, `/rag`, `/health`, `/metrics`'i backend'e yönlendirir.
-Kullanılan endpoint'ler: `/chat`, `/chat/stream` (SSE), `/v1/chat/completions`, `/rag/search`,
-`/health`, `/metrics` ve **auth**'lu uçlar.
+Kullanılan endpoint'ler (kodda `src/lib`, `src/hooks`): `/chat`, `/chat/stream` (SSE),
+`/rag/search`, `/health`, `/health/detailed`, `/metrics` ve **auth**'lu uçlar.
+(`/v1/chat/completions` backend'de OpenAI-uyumluluk için var ama bu arayüz tarafından çağrılmaz.)
 
-## 5. Mevcut durum — auth + kullanıcı-bazlı geçmiş
-- `AuthContext` + `auth-token.ts` ile **JWT oturum** zaten entegre; `permissions.ts` ile RBAC görünürlüğü.
-- `useChatHistory.ts` mevcut → backend'in **kullanıcı-bazlı** geçmiş API'sine (`GET /chat/history`,
-  JWT ile) bağlanır. Böylece geçmiş giriş yapan kullanıcıya **izole** çekilir; eski "herkes
-  birbirinin geçmişini görüyor" sorunu için backend (owner-scoped SQLite) + bu hook birlikte çözümdür.
-  *(Bkz. backend `docs/20_CHAT_HISTORY_VE_OTURUM.md`.)*
+## 5. Mevcut durum — auth + sohbet geçmişi
+- `AuthContext` + `auth-token.ts` ile **JWT oturum** entegre; `permissions.ts` ile RBAC görünürlüğü.
+- `useChatHistory.ts` geçmişi şu an **tarayıcı `localStorage`'ında** tutar (`chat_history_v1`,
+  son N oturum). Yani geçmiş **per-browser**'dır; backend'in kullanıcı-bazlı API'sine henüz BAĞLI DEĞİL.
+- **Açık entegrasyon adımı:** backend tarafında kullanıcı-bazlı kalıcı geçmiş API'si HAZIR
+  (`GET /chat/history`, `GET /chat/sessions`, owner-scoped SQLite — bkz. backend
+  `docs/20_CHAT_HISTORY_VE_OTURUM.md`). `useChatHistory`'nin localStorage yerine bu API'den
+  (giriş yapan kullanıcının JWT'siyle) çekecek şekilde bağlanması gerekir → böylece geçmiş
+  kullanıcıya izole olur ve cihazlar arası taşınır.
 
 ## 6. Kalite & dağıtım
-`eslint` + `tsc --noEmit` temiz; `npm run build` üretim derlemesi (~69 kB gzip). Docker (dev: Vite+HMR,
-prod: nginx). Aynı Docker/monitoring düzenine hizalı (deploy reposu).
+`eslint` + `tsc --noEmit` temiz; `npm run build` (Vite) statik bundle üretir. Docker (dev: Vite+HMR,
+prod: nginx ile statik servis). Aynı Docker/monitoring düzenine hizalı (deploy reposu).
 
 ## 7. Açık/gelecek
 Responsive iyileştirme, dark mode, kullanıcı geri bildirim mekanizması (öneri formu 3.3 hedefleri).
