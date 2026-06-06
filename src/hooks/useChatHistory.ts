@@ -1,8 +1,28 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ChatMessage } from "@/hooks/useChat";
 
-const STORAGE_KEY = "chat_history_v1";
 const MAX_SESSIONS = 40;
+
+function storageKey(userId: string): string {
+  return `chat_history_v1_${userId}`;
+}
+
+function loadFromStorage(userId: string): HistorySession[] {
+  try {
+    const raw = localStorage.getItem(storageKey(userId));
+    return raw ? (JSON.parse(raw) as HistorySession[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveToStorage(userId: string, sessions: HistorySession[]): void {
+  try {
+    localStorage.setItem(storageKey(userId), JSON.stringify(sessions.slice(0, MAX_SESSIONS)));
+  } catch {
+    // Storage full or unavailable — fail silently
+  }
+}
 
 export interface HistorySession {
   id: string;
@@ -11,25 +31,13 @@ export interface HistorySession {
   messages: ChatMessage[];
 }
 
-function loadFromStorage(): HistorySession[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as HistorySession[]) : [];
-  } catch {
-    return [];
-  }
-}
+export function useChatHistory(userId: string) {
+  const [sessions, setSessions] = useState<HistorySession[]>(() => loadFromStorage(userId));
 
-function saveToStorage(sessions: HistorySession[]): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.slice(0, MAX_SESSIONS)));
-  } catch {
-    // Storage full or unavailable — fail silently
-  }
-}
-
-export function useChatHistory() {
-  const [sessions, setSessions] = useState<HistorySession[]>(loadFromStorage);
+  // Kullanıcı değişince (farklı hesap girişi) o kullanıcıya ait geçmişi yükle.
+  useEffect(() => {
+    setSessions(loadFromStorage(userId));
+  }, [userId]);
 
   const saveSession = useCallback((messages: ChatMessage[]) => {
     const done = messages.filter((m) => !m.streaming && m.content.trim());
@@ -47,10 +55,10 @@ export function useChatHistory() {
 
     setSessions((prev) => {
       const next = [session, ...prev].slice(0, MAX_SESSIONS);
-      saveToStorage(next);
+      saveToStorage(userId, next);
       return next;
     });
-  }, []);
+  }, [userId]);
 
   /** Var olan sohbeti günceller ve listenin başına taşır. */
   const updateSession = useCallback((id: string, messages: ChatMessage[]) => {
@@ -60,7 +68,6 @@ export function useChatHistory() {
     setSessions((prev) => {
       const existing = prev.find((s) => s.id === id);
       if (!existing) {
-        // Silinmişse yeniden oluştur
         saveSession(messages);
         return prev;
       }
@@ -70,23 +77,23 @@ export function useChatHistory() {
         createdAt: Date.now(),
       };
       const next = [updated, ...prev.filter((s) => s.id !== id)].slice(0, MAX_SESSIONS);
-      saveToStorage(next);
+      saveToStorage(userId, next);
       return next;
     });
-  }, [saveSession]);
+  }, [userId, saveSession]);
 
   const deleteSession = useCallback((id: string) => {
     setSessions((prev) => {
       const next = prev.filter((s) => s.id !== id);
-      saveToStorage(next);
+      saveToStorage(userId, next);
       return next;
     });
-  }, []);
+  }, [userId]);
 
   const clearAll = useCallback(() => {
     setSessions([]);
-    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
-  }, []);
+    try { localStorage.removeItem(storageKey(userId)); } catch { /* ignore */ }
+  }, [userId]);
 
   return { sessions, saveSession, updateSession, deleteSession, clearAll };
 }
