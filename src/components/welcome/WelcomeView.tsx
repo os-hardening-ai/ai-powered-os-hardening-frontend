@@ -92,7 +92,7 @@ export function WelcomeView() {
   return (
     <main className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col px-5 py-10 sm:px-8 sm:py-16">
       {/* Header */}
-      <header className="flex items-center justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-accent/40 bg-accent/10 text-accent">
             <ShieldCheck size={22} aria-hidden="true" />
@@ -102,10 +102,10 @@ export function WelcomeView() {
             <p className="font-mono text-[10px] uppercase tracking-widest text-faint">karar destek sistemi</p>
           </div>
         </div>
-        <nav className="flex items-center gap-2" aria-label="Gezinme">
-          <Link to="/about" className="btn hidden sm:inline-flex">Hakkında</Link>
-          <Link to="/sss" className="btn hidden sm:inline-flex">SSS</Link>
-          <Link to="/contact" className="btn hidden sm:inline-flex">
+        <nav className="flex flex-wrap items-center justify-end gap-2" aria-label="Gezinme">
+          <Link to="/about" className="btn">Hakkında</Link>
+          <Link to="/sss" className="btn">SSS</Link>
+          <Link to="/contact" className="btn">
             <Mail size={15} aria-hidden="true" /> İletişim
           </Link>
           {authed ? (
