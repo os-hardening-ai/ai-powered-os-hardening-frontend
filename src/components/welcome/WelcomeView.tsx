@@ -103,8 +103,8 @@ export function WelcomeView() {
           </div>
         </div>
         <nav className="flex items-center gap-2" aria-label="Gezinme">
-          <Link to="/about" className="hidden text-sm text-muted hover:text-accent sm:inline">Hakkında</Link>
-          <Link to="/sss" className="hidden text-sm text-muted hover:text-accent sm:inline">SSS</Link>
+          <Link to="/about" className="btn hidden sm:inline-flex">Hakkında</Link>
+          <Link to="/sss" className="btn hidden sm:inline-flex">SSS</Link>
           <Link to="/contact" className="btn hidden sm:inline-flex">
             <Mail size={15} aria-hidden="true" /> İletişim
           </Link>
