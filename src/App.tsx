@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { RoleRoute } from "@/components/auth/RoleRoute";
@@ -22,7 +22,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Public — JWT gerektirmez */}
+        {/* ── Public (JWT gerektirmez) ───────────────────────────── */}
         <Route path="/" element={<WelcomeView />} />
         <Route path="/welcome" element={<WelcomeView />} />
         <Route path="/login" element={<LoginView />} />
@@ -34,27 +34,26 @@ export default function App() {
         <Route path="/gizlilik" element={<LegalView kind="privacy" />} />
         <Route path="/kosullar" element={<LegalView kind="terms" />} />
 
-        {/* Protected — JWT gerektirir; AppShell + uygulama route'ları */}
+        {/* ── Korumalı uygulama (AppShell layout + JWT; çocuk route'lar Outlet'e render edilir) ── */}
         <Route
-          path="/*"
           element={
             <ProtectedRoute>
               <AppShell>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/chat" replace />} />
-                  <Route path="/chat" element={<ChatView />} />
-                  {/* Rol gate'li — yetkisiz kullanıcı /chat'e yönlendirilir (RoleRoute) */}
-                  <Route path="/rules" element={<RoleRoute path="/rules"><RulesView /></RoleRoute>} />
-                  <Route path="/agent" element={<RoleRoute path="/agent"><AgentView /></RoleRoute>} />
-                  <Route path="/dashboard" element={<RoleRoute path="/dashboard"><DashboardView /></RoleRoute>} />
-                  <Route path="/retrieval" element={<RetrievalExplorer />} />
-                  <Route path="/rag-test" element={<Navigate to="/retrieval" replace />} />
-                  <Route path="*" element={<NotFoundView />} />
-                </Routes>
+                <Outlet />
               </AppShell>
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/chat" element={<ChatView />} />
+          <Route path="/rules" element={<RoleRoute path="/rules"><RulesView /></RoleRoute>} />
+          <Route path="/agent" element={<RoleRoute path="/agent"><AgentView /></RoleRoute>} />
+          <Route path="/dashboard" element={<RoleRoute path="/dashboard"><DashboardView /></RoleRoute>} />
+          <Route path="/retrieval" element={<RetrievalExplorer />} />
+          <Route path="/rag-test" element={<Navigate to="/retrieval" replace />} />
+        </Route>
+
+        {/* ── Public 404 — bilinmeyen her yol (login'e atmaz) ────── */}
+        <Route path="*" element={<NotFoundView />} />
       </Routes>
     </AuthProvider>
   );

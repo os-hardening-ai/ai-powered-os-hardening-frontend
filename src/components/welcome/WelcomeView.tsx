@@ -102,7 +102,9 @@ export function WelcomeView() {
             <p className="font-mono text-[10px] uppercase tracking-widest text-faint">karar destek sistemi</p>
           </div>
         </div>
-        <nav className="flex items-center gap-2" aria-label="Hesap">
+        <nav className="flex items-center gap-2" aria-label="Gezinme">
+          <Link to="/about" className="hidden text-sm text-muted hover:text-accent sm:inline">Hakkında</Link>
+          <Link to="/sss" className="hidden text-sm text-muted hover:text-accent sm:inline">SSS</Link>
           <Link to="/contact" className="btn hidden sm:inline-flex">
             <Mail size={15} aria-hidden="true" /> İletişim
           </Link>
@@ -261,9 +263,12 @@ export function WelcomeView() {
 
       <footer className="mt-12 flex flex-col items-center gap-2 border-t border-line pt-5 text-center font-mono text-[11px] text-faint">
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <Link to="/about" className="hover:text-accent">Hakkında</Link>
+          <Link to="/sss" className="hover:text-accent">SSS</Link>
           <Link to="/contact" className="hover:text-accent">İletişim</Link>
+          <Link to="/gizlilik" className="hover:text-accent">Gizlilik (KVKK)</Link>
+          <Link to="/kosullar" className="hover:text-accent">Şartlar</Link>
           <Link to="/login" className="hover:text-accent">Giriş</Link>
-          <Link to="/register" className="hover:text-accent">Kayıt ol</Link>
         </div>
         <p>Marmara Üniversitesi · Bilgisayar Mühendisliği Bitirme Projesi · Sıkılaştırma &amp; Zero-Trust RAG</p>
       </footer>
