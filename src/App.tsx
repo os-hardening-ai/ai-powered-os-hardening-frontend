@@ -6,6 +6,11 @@ import { LoginView } from "@/components/auth/LoginView";
 import { RegisterView } from "@/components/auth/RegisterView";
 import { ForgotPasswordView } from "@/components/auth/ForgotPasswordView";
 import { WelcomeView } from "@/components/welcome/WelcomeView";
+import { ContactView } from "@/components/contact/ContactView";
+import { AboutView } from "@/components/public/AboutView";
+import { FaqView } from "@/components/public/FaqView";
+import { LegalView } from "@/components/public/LegalView";
+import { NotFoundView } from "@/components/public/NotFoundView";
 import { AppShell } from "@/components/layout/AppShell";
 import { ChatView } from "@/components/chat/ChatView";
 import { RulesView } from "@/components/rules/RulesView";
@@ -23,6 +28,11 @@ export default function App() {
         <Route path="/login" element={<LoginView />} />
         <Route path="/register" element={<RegisterView />} />
         <Route path="/forgot-password" element={<ForgotPasswordView />} />
+        <Route path="/contact" element={<ContactView />} />
+        <Route path="/about" element={<AboutView />} />
+        <Route path="/sss" element={<FaqView />} />
+        <Route path="/gizlilik" element={<LegalView kind="privacy" />} />
+        <Route path="/kosullar" element={<LegalView kind="terms" />} />
 
         {/* Protected — JWT gerektirir; AppShell + uygulama route'ları */}
         <Route
@@ -39,7 +49,7 @@ export default function App() {
                   <Route path="/dashboard" element={<RoleRoute path="/dashboard"><DashboardView /></RoleRoute>} />
                   <Route path="/retrieval" element={<RetrievalExplorer />} />
                   <Route path="/rag-test" element={<Navigate to="/retrieval" replace />} />
-                  <Route path="*" element={<Navigate to="/chat" replace />} />
+                  <Route path="*" element={<NotFoundView />} />
                 </Routes>
               </AppShell>
             </ProtectedRoute>
