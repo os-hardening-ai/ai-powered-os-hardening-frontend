@@ -1,4 +1,4 @@
-import { Info, Layers, Users } from "lucide-react";
+import { GraduationCap, Info, Layers, Linkedin, Mail, Target, Users } from "lucide-react";
 import { PublicLayout } from "@/components/public/PublicLayout";
 
 const LAYERS: { n: string; t: string; d: string }[] = [
@@ -8,10 +8,26 @@ const LAYERS: { n: string; t: string; d: string }[] = [
   { n: "L4", t: "Validation", d: "Üretim + groundedness doğrulama (ClaimVerifier)." },
 ];
 
-const TEAM: { name: string; role: string }[] = [
-  { name: "Engin", role: "Enhanced RAG & Embeddings (İP-2–4) · Gözlemlenebilirlik (İP-11)" },
-  { name: "Mert", role: "LLM / Agentic pipeline · Güvenlik · Değerlendirme (İP-5–8)" },
-  { name: "Tankut", role: "Frontend & API yüzeyi (İP-9–10)" },
+// NOT: Aşağıdaki ad / LinkedIn / e-posta alanlarını kendi bilgilerinizle doldurun.
+const TEAM: { name: string; role: string; linkedin: string; email: string }[] = [
+  {
+    name: "Engin [Soyad]",
+    role: "Enhanced RAG & Embeddings (İP-2–4) · Gözlemlenebilirlik (İP-11)",
+    linkedin: "https://www.linkedin.com/in/kullanici-adi",
+    email: "engin@ornek.com",
+  },
+  {
+    name: "Mert Baytaş",
+    role: "LLM / Agentic pipeline · Güvenlik · Değerlendirme (İP-5–8)",
+    linkedin: "https://www.linkedin.com/in/kullanici-adi",
+    email: "mertbaytas@gmail.com",
+  },
+  {
+    name: "Tankut [Soyad]",
+    role: "Frontend & API yüzeyi (İP-9–10)",
+    linkedin: "https://www.linkedin.com/in/kullanici-adi",
+    email: "tankut@ornek.com",
+  },
 ];
 
 const STACK = [
@@ -24,10 +40,31 @@ export function AboutView() {
     <PublicLayout
       eyebrow={<><Info size={13} aria-hidden="true" /> Hakkında</>}
       title="Proje hakkında"
-      intro="CIS Benchmark, NIST SP 800-207 ve ISO 27001 kaynaklarından beslenen, işletim sistemi sıkılaştırması için RAG + LLM tabanlı bir karar destek sistemi. Doğal dil sorularını dayanaklı önerilere ve çalıştırılabilir script'lere dönüştürür."
+      intro="CIS Benchmark, NIST SP 800-207 ve ISO 27001 kaynaklarından beslenen, işletim sistemi sıkılaştırması için RAG + LLM tabanlı bir karar destek sistemi."
     >
+      {/* Bitirme projesi rozeti */}
+      <div className="panel flex items-start gap-3 p-4">
+        <GraduationCap size={20} className="mt-0.5 shrink-0 text-accent" aria-hidden="true" />
+        <p className="text-[13px] leading-relaxed text-muted">
+          Bu sistem, <strong className="text-ink">Marmara Üniversitesi Bilgisayar Mühendisliği</strong>{" "}
+          bölümü <strong className="text-ink">bitirme projesi</strong> kapsamında, 4. sınıf öğrencileri
+          tarafından geliştirilmiştir.
+        </p>
+      </div>
+
+      {/* Amaç */}
+      <h2 className="mb-2 mt-10 flex items-center gap-2 text-sm font-semibold text-ink">
+        <Target size={16} className="text-accent" aria-hidden="true" /> Amaç
+      </h2>
+      <p className="text-[13px] leading-relaxed text-muted">
+        Güvenlik uzmanlarının işletim sistemi sıkılaştırma kararlarını; doğal dil sorularını
+        <strong className="text-ink"> kaynağa-dayalı (groundedness)</strong>, denetlenebilir önerilere
+        ve <strong className="text-ink">çalıştırılabilir hardening script'lerine</strong> dönüştürerek
+        hızlandırmak ve hata payını azaltmaktır.
+      </p>
+
       {/* Mimari */}
-      <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+      <h2 className="mb-3 mt-10 flex items-center gap-2 text-sm font-semibold text-ink">
         <Layers size={16} className="text-accent" aria-hidden="true" /> 4 katmanlı güvenli pipeline
       </h2>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -43,14 +80,33 @@ export function AboutView() {
       </div>
 
       {/* Ekip */}
-      <h2 className="mb-3 mt-10 flex items-center gap-2 text-sm font-semibold text-ink">
-        <Users size={16} className="text-accent" aria-hidden="true" /> Ekip & iş paketleri (İP)
+      <h2 className="mb-1 mt-10 flex items-center gap-2 text-sm font-semibold text-ink">
+        <Users size={16} className="text-accent" aria-hidden="true" /> Ekip
       </h2>
-      <div className="flex flex-col gap-2">
+      <p className="mb-3 text-[12px] text-faint">Marmara Üniversitesi · Bilgisayar Mühendisliği · 4. sınıf</p>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {TEAM.map((m) => (
-          <div key={m.name} className="panel flex flex-col gap-0.5 p-4 sm:flex-row sm:items-center sm:gap-4">
-            <span className="font-mono text-sm font-semibold text-accent sm:w-20">{m.name}</span>
-            <span className="text-[13px] leading-relaxed text-muted">{m.role}</span>
+          <div key={m.name} className="panel flex flex-col gap-2 p-4">
+            <span className="text-sm font-semibold text-ink">{m.name}</span>
+            <p className="flex-1 text-[12px] leading-relaxed text-muted">{m.role}</p>
+            <div className="flex items-center gap-3 pt-1">
+              <a
+                href={m.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                className="text-faint transition-colors hover:text-accent"
+                aria-label={`${m.name} LinkedIn`}
+              >
+                <Linkedin size={16} aria-hidden="true" />
+              </a>
+              <a
+                href={`mailto:${m.email}`}
+                className="text-faint transition-colors hover:text-accent"
+                aria-label={`${m.name} e-posta`}
+              >
+                <Mail size={16} aria-hidden="true" />
+              </a>
+            </div>
           </div>
         ))}
       </div>
