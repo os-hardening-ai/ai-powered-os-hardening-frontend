@@ -20,8 +20,35 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
         <main className="min-h-0 flex-1 overflow-hidden p-4">{children}</main>
+        <MobileNav />
       </div>
     </div>
+  );
+}
+
+function MobileNav() {
+  const { user } = useAuth();
+  const nav = NAV.filter(({ to }) => canAccess(to, user?.role));
+  return (
+    <nav
+      className="flex shrink-0 items-center justify-around border-t border-line bg-surface/80 px-1 py-1 backdrop-blur md:hidden"
+      aria-label="Mobil gezinme"
+    >
+      {nav.map(({ to, label, icon: Icon }) => (
+        <NavLink
+          key={to}
+          to={to}
+          className={({ isActive }) =>
+            `flex flex-col items-center gap-0.5 rounded-md px-2 py-1 text-[10px] transition-colors ${
+              isActive ? "text-accent" : "text-faint hover:text-ink"
+            }`
+          }
+        >
+          <Icon size={18} />
+          {label}
+        </NavLink>
+      ))}
+    </nav>
   );
 }
 

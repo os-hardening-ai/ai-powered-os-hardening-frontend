@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+# Korumalı (giriş gerektiren) uygulama yolları dizine eklenmesin
+Disallow: /chat
+Disallow: /dashboard
+Disallow: /rules
+Disallow: /agent
+Disallow: /retrieval

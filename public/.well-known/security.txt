@@ -1,0 +1,5 @@
+# https://hardeningai.site/.well-known/security.txt  (RFC 9116)
+Contact: mailto:hardeningai@gmail.com
+Expires: 2027-06-06T00:00:00.000Z
+Preferred-Languages: tr, en
+Canonical: https://hardeningai.site/.well-known/security.txt
