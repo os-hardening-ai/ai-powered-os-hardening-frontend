@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Download, FileText, History, MessagesSquare, Printer, RotateCcw, Sparkles } from "lucide-react";
 import { DEFAULT_SETTINGS, useChat, type ChatSettings } from "@/hooks/useChat";
 import { useChatHistory, type HistorySession } from "@/hooks/useChatHistory";
+import { useAuth } from "@/context/AuthContext";
 import { exportMarkdown, exportPdf } from "@/lib/export";
 import { MessageBubble } from "./MessageBubble";
 import { Composer } from "./Composer";
@@ -12,8 +13,9 @@ import { EmptyState, ErrorBanner } from "@/components/ui/ui";
 type ActivePanel = "context" | "history";
 
 export function ChatView() {
+  const { user } = useAuth();
   const { messages, busy, error, send, stop, reset, loadSession } = useChat();
-  const { sessions, saveSession, updateSession, deleteSession, clearAll } = useChatHistory();
+  const { sessions, saveSession, updateSession, deleteSession, clearAll } = useChatHistory(user!.username);
   const [settings, setSettings] = useState<ChatSettings>(DEFAULT_SETTINGS);
   const [activePanel, setActivePanel] = useState<ActivePanel>("context");
   const [exportOpen, setExportOpen] = useState(false);
