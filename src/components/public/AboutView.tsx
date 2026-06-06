@@ -8,25 +8,28 @@ const LAYERS: { n: string; t: string; d: string }[] = [
   { n: "L4", t: "Validation", d: "Üretim + groundedness doğrulama (ClaimVerifier)." },
 ];
 
-// NOT: Aşağıdaki ad / LinkedIn / e-posta alanlarını kendi bilgilerinizle doldurun.
-const TEAM: { name: string; role: string; linkedin: string; email: string }[] = [
+// NOT: linkedin alanlarına gerçek profil URL'lerini yapıştırın (şu an placeholder).
+const TEAM: { name: string; no: string; role: string; linkedin: string; email: string }[] = [
   {
-    name: "Engin [Soyad]",
+    name: "Engin Çetintaş",
+    no: "170422026",
     role: "Enhanced RAG & Embeddings (İP-2–4) · Gözlemlenebilirlik (İP-11)",
-    linkedin: "https://www.linkedin.com/in/kullanici-adi",
-    email: "engin@ornek.com",
+    linkedin: "https://www.linkedin.com/in/engin-%C3%A7etinta%C5%9F-808378281/",
+    email: "engincts@gmail.com",
   },
   {
     name: "Mert Baytaş",
+    no: "138320067",
     role: "LLM / Agentic pipeline · Güvenlik · Değerlendirme (İP-5–8)",
-    linkedin: "https://www.linkedin.com/in/kullanici-adi",
+    linkedin: "https://www.linkedin.com/in/mertbaytas/",
     email: "mertbaytas@gmail.com",
   },
   {
-    name: "Tankut [Soyad]",
+    name: "Tankut Arca Can",
+    no: "171422009",
     role: "Frontend & API yüzeyi (İP-9–10)",
-    linkedin: "https://www.linkedin.com/in/kullanici-adi",
-    email: "tankut@ornek.com",
+    linkedin: "https://www.linkedin.com/in/tankut-arca-can-688aab2a5/",
+    email: "t.arcacan@gmail.com",
   },
 ];
 
@@ -88,6 +91,7 @@ export function AboutView() {
         {TEAM.map((m) => (
           <div key={m.name} className="panel flex flex-col gap-2 p-4">
             <span className="text-sm font-semibold text-ink">{m.name}</span>
+            <span className="font-mono text-[10px] text-faint">No: {m.no}</span>
             <p className="flex-1 text-[12px] leading-relaxed text-muted">{m.role}</p>
             <div className="flex items-center gap-3 pt-1">
               <a
