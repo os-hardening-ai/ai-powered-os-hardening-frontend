@@ -10,3 +10,8 @@ dist-ssr
 vite.config.js
 vite.config.d.ts
 *.tsbuildinfo
+
+# Claude / agent config (local — release paketine girmesin)
+.claude/
+CLAUDE.md
+AGENTS.md
