@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, HelpCircle } from "lucide-react";
 
 type Tone = "accent" | "info" | "warn" | "danger" | "muted";
 
@@ -109,20 +109,54 @@ export function Toggle({
   );
 }
 
+/**
+ * Küçük "?" ikonu — üzerine gelince (hover) açıklama balonu açar.
+ * Erişilebilir: ikon focus alır, klavye/dokunmatik için de balon görünür.
+ */
+export function InfoTip({ content, label = "Bilgi" }: { content: ReactNode; label?: string }) {
+  return (
+    <span className="group/tip relative inline-flex align-middle">
+      <button
+        type="button"
+        aria-label={label}
+        className="cursor-help text-faint transition-colors hover:text-accent focus:text-accent focus:outline-none"
+      >
+        <HelpCircle size={13} aria-hidden="true" />
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg
+          border border-line bg-surface px-3 py-2 text-left text-[11px] font-normal normal-case leading-relaxed
+          tracking-normal text-muted opacity-0 shadow-xl transition-opacity duration-150
+          group-hover/tip:opacity-100 group-focus-within/tip:opacity-100"
+      >
+        {content}
+      </span>
+    </span>
+  );
+}
+
 export function Select<T extends string>({
   value,
   onChange,
   options,
   label,
+  info,
 }: {
   value: T;
   onChange: (v: T) => void;
   options: { value: T; label: string }[];
   label?: string;
+  info?: ReactNode;  // verilirse label yanına "?" hover-açıklaması koyar
 }) {
   return (
     <label className="flex flex-col gap-1">
-      {label && <span className="label">{label}</span>}
+      {label && (
+        <span className="label inline-flex items-center gap-1.5">
+          {label}
+          {info && <InfoTip content={info} label={`${label} hakkında`} />}
+        </span>
+      )}
       <select className="field appearance-none" value={value} onChange={(e) => onChange(e.target.value as T)}>
         {options.map((o) => (
           <option key={o.value} value={o.value} className="bg-surface">

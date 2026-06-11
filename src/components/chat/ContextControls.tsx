@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, AlertTriangle } from "lucide-react";
-import { Select, Toggle } from "@/components/ui/ui";
+import { Select, Toggle, InfoTip } from "@/components/ui/ui";
 import { OS_OPTIONS, ROLE_OPTIONS, SECURITY_LEVELS, ZT_MATURITY_OPTIONS } from "@/config";
 import type { ChatSettings } from "@/hooks/useChat";
 import type { OsTarget, SecurityLevel, UserRole, ZtMaturity } from "@/types/api";
@@ -54,12 +54,38 @@ export function ContextControls({
           />
           <Select<SecurityLevel>
             label="Güvenlik seviyesi"
+            info={
+              <>
+                Üretilen öneri/script'in <strong>sıkılık derecesi</strong>:
+                <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                  <li><strong>minimal</strong> — temel, düşük-etki ayarlar; kesinti/erişim kaybı riski en az.</li>
+                  <li><strong>balanced</strong> — güvenlik ↔ kullanılabilirlik dengesi (CIS Level 1 odaklı). Varsayılan.</li>
+                  <li><strong>strict</strong> — en sıkı (CIS Level 2 dahil); maksimum güvenlik ama bazı servisleri kısıtlayıp kesintiye yol açabilir.</li>
+                </ul>
+              </>
+            }
             value={settings.security_level}
             onChange={(v) => set("security_level", v)}
             options={SECURITY_LEVELS.map((s) => ({ value: s, label: s }))}
           />
           <label className="flex flex-col gap-1">
-            <span className="label">ZT Olgunluğu</span>
+            <span className="label inline-flex items-center gap-1.5">
+              ZT Olgunluğu
+              <InfoTip
+                label="ZT olgunluğu hakkında"
+                content={
+                  <>
+                    Önerilere katılan <strong>Zero Trust derinliği</strong>:
+                    <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                      <li><strong>Düşük</strong> — least privilege + temel loglama.</li>
+                      <li><strong>Orta</strong> — + MFA + ağ segmentasyonu.</li>
+                      <li><strong>Yüksek</strong> — + sürekli doğrulama + mikro-segmentasyon.</li>
+                    </ul>
+                    Yüksek seviye = daha katmanlı koruma ama uygulaması daha karmaşık öneriler.
+                  </>
+                }
+              />
+            </span>
             <select
               className="field appearance-none"
               value={settings.zt_maturity}
