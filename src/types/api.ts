@@ -67,6 +67,8 @@ export interface ChatRequest {
   security_level?: SecurityLevel;
   zt_maturity?: ZtMaturity;
   use_rag?: boolean;
+  verify_claims?: boolean;  // groundedness doğrulama (yavaş, opt-in)
+  deep_validate?: boolean;  // çıktı doğrulama / script judge (yavaş, opt-in)
   rag_top_k?: number;   // 1..20
   rag_min_score?: number; // 0..1
   stream?: boolean;

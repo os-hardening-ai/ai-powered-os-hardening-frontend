@@ -149,6 +149,62 @@ export function ContextControls({
               onChange={(v) => set("stream", v)}
             />
 
+            {/* ── Doğrulama (kalite ↔ hız) — opt-in, VARSAYILAN KAPALI, açılınca perf uyarısı ── */}
+            <div className="border-t border-line pt-3">
+              <span className="label inline-flex items-center gap-1.5">
+                Doğrulama (kalite ↔ hız)
+                <InfoTip
+                  label="Doğrulama hakkında"
+                  content={
+                    <>
+                      Cevap kalitesini artıran ama <strong>yanıtı yavaşlatan</strong> ek
+                      doğrulama adımları. Varsayılan <strong>kapalı</strong> (hız için);
+                      güvenilirlik kritikse aç.
+                    </>
+                  }
+                />
+              </span>
+              <div className="mt-2 space-y-2">
+                <Toggle
+                  label="Kaynak doğrulama (groundedness)"
+                  checked={settings.verify_claims}
+                  onChange={(v) => set("verify_claims", v)}
+                />
+                {settings.verify_claims && (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-2 rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-warn"
+                  >
+                    <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                    <span>
+                      <strong>Performans uyarısı:</strong> cevabın her iddiası CIS kaynaklarına
+                      karşı tek tek doğrulanır (halüsinasyon ↓, daha güvenilir) ama yanıt{" "}
+                      <strong>~15 sn daha yavaş</strong> olur.
+                    </span>
+                  </div>
+                )}
+                <Toggle
+                  label="Çıktı doğrulama (script denetimi)"
+                  checked={settings.deep_validate}
+                  onChange={(v) => set("deep_validate", v)}
+                />
+                {settings.deep_validate && (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-2 rounded-lg border border-warn/40 bg-warn/10 px-3 py-2 text-xs text-warn"
+                  >
+                    <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                    <span>
+                      <strong>Performans uyarısı:</strong> üretilen script LLM ile denetlenip
+                      gerekirse düzeltilir (daha güvenli) ama yanıt{" "}
+                      <strong>~10 sn daha yavaş</strong> olur. Statik güvenlik kontrolü
+                      (tehlikeli komut) zaten her zaman açıktır.
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Aktif uç — request gövdesi aynı (ChatRequest); değişen yalnız stream aç/kapa. */}
             <div className="rounded-lg border border-line bg-bg/40 px-3 py-2">
               <p className="label normal-case tracking-normal text-faint">Aktif uç</p>

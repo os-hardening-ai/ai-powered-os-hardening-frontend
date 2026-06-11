@@ -19,6 +19,8 @@ export interface ChatSettings {
   security_level: SecurityLevel;
   zt_maturity: ZtMaturity;
   use_rag: boolean;
+  verify_claims: boolean;  // groundedness doğrulama (ClaimVerifier) — yavaş, opt-in
+  deep_validate: boolean;  // çıktı doğrulama (script judge/correction) — yavaş, opt-in
   rag_top_k: number;
   rag_min_score: number;
   stream: boolean;
@@ -51,6 +53,10 @@ export const DEFAULT_SETTINGS: ChatSettings = {
   security_level: "balanced",
   zt_maturity: "medium",
   use_rag: true,
+  // Kalite↔hız tradeoff'lu doğrulamalar VARSAYILAN KAPALI — açılınca yanıt belirgin yavaşlar
+  // (verify_claims ~15s, deep_validate ~10s). Kullanıcı isterse açar (perf uyarısı gösterilir).
+  verify_claims: false,
+  deep_validate: false,
   rag_top_k: 3,
   rag_min_score: 0.5,
   stream: true,
@@ -92,6 +98,8 @@ export function useChat() {
         security_level: settings.security_level,
         zt_maturity: settings.zt_maturity,
         use_rag: settings.use_rag,
+        verify_claims: settings.verify_claims,
+        deep_validate: settings.deep_validate,
         rag_top_k: settings.rag_top_k,
         rag_min_score: settings.rag_min_score > 0 ? settings.rag_min_score : undefined,
         stream: settings.stream,
