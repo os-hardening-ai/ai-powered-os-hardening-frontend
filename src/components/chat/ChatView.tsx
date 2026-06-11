@@ -15,7 +15,9 @@ type ActivePanel = "context" | "history";
 export function ChatView() {
   const { user } = useAuth();
   const { messages, busy, error, send, stop, reset, loadSession } = useChat();
-  const { sessions, saveSession, updateSession, deleteSession, clearAll } = useChatHistory(user!.username);
+  // ChatView ProtectedRoute arkasında (prod'da user hep var), ama null'da ÇÖKME (test/anon
+  // veya yarış durumu) → güvenli fallback ile session geçmişini boş anahtara köklendir.
+  const { sessions, saveSession, updateSession, deleteSession, clearAll } = useChatHistory(user?.username ?? "");
   const [settings, setSettings] = useState<ChatSettings>(DEFAULT_SETTINGS);
   const [activePanel, setActivePanel] = useState<ActivePanel>("context");
   const [exportOpen, setExportOpen] = useState(false);
